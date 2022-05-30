@@ -16,7 +16,7 @@ BluetoothSerial SerialBT;
 
 void setup(void) {
   Serial.begin(115200);
-  SerialBT.begin("IMUonBag"); //Bluetooth device name
+  SerialBT.begin("ImuOnBag"); //Bluetooth device name
   SerialBT.println("Start sending data");
   Serial.println("The device started, now you can pair it with bluetooth!");
   while (!Serial) {
@@ -32,10 +32,9 @@ void setup(void) {
   }
 
   mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
-  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  mpu.setGyroRange(MPU6050_RANGE_2000_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
   Serial.println("");
-  delay(100);
 }
 
 void loop() {
@@ -47,27 +46,23 @@ void loop() {
   /* Print out the values */
   Serial.print("AccelX:");
   Serial.print(a.acceleration.x);
-
   Serial.print(" ");
   Serial.print("AccelY:");
   Serial.print(a.acceleration.y);
-
   Serial.print(" ");
   Serial.print("AccelZ:");
   Serial.print(a.acceleration.z);
-
   Serial.print(", ");
   Serial.print("GyroX:");
   Serial.print(g.gyro.x);
-
   Serial.print(" ");
   Serial.print("GyroY:");
   Serial.print(g.gyro.y);
-
   Serial.print(" ");
   Serial.print("GyroZ:");
   Serial.print(g.gyro.z);
-
+  Serial.print("Temperature: ");
+  Serial.print(temp.temperature);
   Serial.println("");
   //  Bluetooth
   SerialBT.print(a.acceleration.x);
