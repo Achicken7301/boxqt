@@ -1,49 +1,49 @@
-from PyQt5 import QtWidgets, QtCore
-from pyqtgraph import PlotWidget, plot
-import pyqtgraph as pg
-import sys  # We need sys so that we can pass argv to QApplication
-import os
+from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
 
-class MainWindow(QtWidgets.QMainWindow):
+class Ui_MainWindow(object):
 
-    def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+	def setupUi(self, MainWindow):
+		MainWindow.resize(506, 312)
+		self.centralwidget = QtWidgets.QWidget(MainWindow)
+		
+		# adding pushbutton
+		self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+		self.pushButton.setGeometry(QtCore.QRect(200, 150, 93, 28))
 
-        self.graphWidget = pg.PlotWidget()
-        self.setCentralWidget(self.graphWidget)
+		# adding signal and slot
+		self.pushButton.clicked.connect(self.changelabeltext)
+	
+		self.label = QtWidgets.QLabel(self.centralwidget)
+		self.label.setGeometry(QtCore.QRect(140, 90, 221, 20))	
 
-        hour = [1,2,3,4,5,6,7,8,9,10]
-        temperature_1 = [30,32,34,32,33,31,29,32,35,45]
-        temperature_2 = [50,35,44,22,38,32,27,38,32,44]
+		# keeping the text of label empty before button get clicked
+		self.label.setText("")	
+		
+		MainWindow.setCentralWidget(self.centralwidget)
+		self.retranslateUi(MainWindow)
+		QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        #Add Background colour to white
-        self.graphWidget.setBackground('w')
-        # Add Title
-        self.graphWidget.setTitle("Your Title Here", color="b", size="30pt")
-        # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
-        self.graphWidget.setLabel("left", "Temperature (°C)", **styles)
-        self.graphWidget.setLabel("bottom", "Hour (H)", **styles)
-        #Add legend
-        self.graphWidget.addLegend()
-        #Add grid
-        self.graphWidget.showGrid(x=True, y=True)
-        #Set Range
-        self.graphWidget.setXRange(0, 10, padding=0)
-        self.graphWidget.setYRange(20, 55, padding=0)
+	def retranslateUi(self, MainWindow):
+		_translate = QtCore.QCoreApplication.translate
+		MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+		self.pushButton.setText(_translate("MainWindow", "Push Button"))
+		
+	def changelabeltext(self):
 
-        self.plot(hour, temperature_1, "Sensor1", 'r')
-        self.plot(hour, temperature_2, "Sensor2", 'b')
+		# changing the text of label after button get clicked
+		self.label.setText("You clicked PushButton")	
 
-    def plot(self, x, y, plotname, color):
-        pen = pg.mkPen(color=color)
-        self.graphWidget.plot(x, y, name=plotname, pen=pen, symbolBrush=(color))
+		# Hiding pushbutton from the main window
+		# after button get clicked.
+		self.pushButton.hide()
 
-def main():
-    app = QtWidgets.QApplication(sys.argv)
-    main = MainWindow()
-    main.show()
-    sys.exit(app.exec_())
+if __name__ == "__main__":
+	app = QtWidgets.QApplication(sys.argv)
+	
+	MainWindow = QtWidgets.QMainWindow()
+	ui = Ui_MainWindow()
+	ui.setupUi(MainWindow)
+	MainWindow.show()
 
-if __name__ == '__main__':
-    main()
+	sys.exit(app.exec_())
