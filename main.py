@@ -56,9 +56,9 @@ class MainWindow(QtWidgets.QMainWindow):
         pen_accel_x = pg.mkPen('r', width=width)
         pen_accel_y = pg.mkPen('b', width=width)
         pen_accel_z = pg.mkPen('g', width=width)
-        pen_gyro_x = pg.mkPen('r', width=width)
-        pen_gyro_y = pg.mkPen('b', width=width)
-        pen_gyro_z = pg.mkPen('g', width=width)
+        pen_gyro_x = pg.mkPen('c', width=width)
+        pen_gyro_y = pg.mkPen('m', width=width)
+        pen_gyro_z = pg.mkPen('k', width=width)
 
         self.data_line_accel_x = self.acceleration.plot(
             self.x, self.accel_x, pen=pen_accel_x, name="accel_x")
@@ -76,23 +76,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # button
         self.startRecordBtn.clicked.connect(lambda: self.start_record())
         self.stopRecordBtn.clicked.connect(lambda: self.stop_record())
-        self.exportData.clicked.connect(lambda: self.export_to_csv())
 
         # ... init continued ...
         self.timer = QtCore.QTimer()
 
         # Update value to plot
-        self.timer.timeout.connect(self.update_data_imu_on_bag)
+        # self.timer.timeout.connect(lambda: self.update_data_imu_on_bag())
 
         # Recording data
         self.timer.timeout.connect(lambda: self.record_data())
 
         self.timer.start()
 
-        # Update Sample rate
-        self.sample_rate.setText("This is Sample Rate")
-
     def start_record(self):
+        self.sample_rate.setText("Recording")
         if self.is_record == True:
             print("Already Recording")
         else:
@@ -100,8 +97,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.is_record = True
 
     def stop_record(self):
+        self.export_to_csv()
+        self.sample_rate.setText("Stop Recording")
         print("Stop Recording")
+        # Empty data before record a new one
         self.is_record = False
+        self.acceleration_x = []
+        self.acceleration_y = []
+        self.acceleration_z = []
+        self.gyroscope_x = []
+        self.gyroscope_y = []
+        self.gyroscope_z = []
+        self.data = []
 
     def record_data(self):
         if self.is_record == True:
@@ -109,7 +116,8 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 string_n = b.decode()
                 [a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
-                # print(a_x + " " + a_y + " " + a_z + " " + g_x + " " + g_y + " " + g_z)
+                print(a_x + " " + a_y + " " + a_z +
+                      " " + g_x + " " + g_y + " " + g_z)
 
                 self.acceleration_x.append(float(a_x))
                 self.acceleration_y.append(float(a_y))
@@ -154,13 +162,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.acceleration.x = self.x[1:]  # Remove the first y element.
         # Add a new value 1 higher than the last.
         self.acceleration.x.append(self.x[-1] + 1)
-
         b = ser.readline()
         # Cannot decode the 1st value b'\xb4j7\r\n'
         # solve this with try except
         try:
             string_n = b.decode()
             [a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
+            # print(a_x + " " + a_y + " " + a_z +
+            #       " " + g_x + " " + g_y + " " + g_z)
             # Acceleration
             self.accel_x = self.accel_x[1:]
             self.accel_y = self.accel_y[1:]

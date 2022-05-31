@@ -4,9 +4,6 @@ import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
 from random import randint
-import serial
-
-ser = serial.Serial(port='COM6', baudrate=115200)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -17,64 +14,54 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphWidget = pg.PlotWidget()
         self.setCentralWidget(self.graphWidget)
 
-        self.x = list(range(500))  # 500 time points
-        self.accel_x = [0 for _ in range(500)]  # 500 data points
-        # self.accel_y = [0 for _ in range(500)]  # 500 data points
+        self.x = list(range(100))  # 100 time points
+        self.y = [randint(0, 100) for _ in range(100)]  # 100 data points
+        self.a = [randint(0, 100) for _ in range(100)]  # 100 data points
+        self.b = [randint(0, 100) for _ in range(100)]  # 100 data points
+        self.c = [randint(0, 100) for _ in range(100)]  # 100 data points
+        self.d = [randint(0, 100) for _ in range(100)]  # 100 data points
 
         self.graphWidget.setBackground('w')
-
-        pen_accel_x = pg.mkPen(color=(255, 0, 0))
-        pen_accel_y = pg.mkPen(color=(0, 255, 0))
-        self.data_line_accel_x = self.graphWidget.plot(self.x, self.accel_x, pen=pen_accel_x)
-        # self.data_line_accel_y = self.graphWidget.plot(self.x, self.pen_accel_y, pen=pen_accel_y)
+        width = 1
+        pen = pg.mkPen(color=(255, 0, 0))
+        pen_a = pg.mkPen('b', width=width)
+        pen_b = pg.mkPen('g', width=width)
+        pen_c = pg.mkPen(color=(255, 0, 0))
+        pen_d = pg.mkPen(color=(255, 0, 0))
+        self.data_line = self.graphWidget.plot(self.x, self.y, pen=pen)
+        self.data_line_a = self.graphWidget.plot(self.x, self.y, pen=pen_a)
+        self.data_line_b = self.graphWidget.plot(self.x, self.y, pen=pen_b)
+        self.data_line_c = self.graphWidget.plot(self.x, self.y, pen=pen_c)
+        self.data_line_d = self.graphWidget.plot(self.x, self.y, pen=pen_d)
 
         # ... init continued ...
         self.timer = QtCore.QTimer()
         # self.timer.setInterval(50)
-        self.timer.timeout.connect(self.update_accel_x)
+        self.timer.timeout.connect(self.update_plot_data)
         self.timer.start()
 
-    def update_accel_x(self):
-    
+    def update_plot_data(self):
+
         self.x = self.x[1:]  # Remove the first y element.
         # Add a new value 1 higher than the last.
         self.x.append(self.x[-1] + 1)
 
-        b = ser.readline()
-        # Cannot decode the 1st value b'\xb4j7\r\n'
-        # solve this with try except
-        try:
-            string_n = b.decode()
+        self.y = self.y[1:]  # Remove the first
+        self.a = self.a[1:]  # Remove the first
+        self.b = self.b[1:]  # Remove the first
+        self.c = self.c[1:]  # Remove the first
+        self.d = self.d[1:]  # Remove the first
+        self.y.append(randint(0, 100))  # Add a new random value.
+        self.a.append(randint(0, 100))  # Add a new random value.
+        self.b.append(randint(0, 100))  # Add a new random value.
+        self.c.append(randint(0, 100))  # Add a new random value.
+        self.d.append(randint(0, 100))  # Add a new random value.
 
-            print(string_n)
-            [a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
-            self.accel_x = self.accel_x[1:]  # Remove the first
-            self.accel_x.append(float(a_x))  # Add a new random value.
-        except Exception:
-            pass
-
-        self.data_line_accel_x.setData(self.x, self.accel_x)  # Update the data.
-
-    def update_accel_y(self):
-    
-        self.x = self.x[1:]  # Remove the first y element.
-        # Add a new value 1 higher than the last.
-        self.x.append(self.x[-1] + 1)
-
-        b = ser.readline()
-        # Cannot decode the 1st value b'\xb4j7\r\n'
-        # solve this with try except
-        try:
-            string_n = b.decode()
-
-            print(string_n)
-            [a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
-            self.accel_y = self.accel_y[1:]  # Remove the first
-            self.accel_y.append(float(a_x))  # Add a new random value.
-        except Exception:
-            pass
-
-        self.data_line_accel_y.setData(self.x, self.accel_y)  # Update the data.
+        self.data_line.setData(self.x, self.y)  # Update the data.
+        self.data_line_a.setData(self.x, self.a)  # Update the data.
+        self.data_line_b.setData(self.x, self.b)  # Update the data.
+        self.data_line_c.setData(self.x, self.c)  # Update the data.
+        self.data_line_d.setData(self.x, self.d)  # Update the data.
 
 
 app = QtWidgets.QApplication(sys.argv)
