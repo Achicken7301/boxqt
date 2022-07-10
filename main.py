@@ -1,147 +1,125 @@
 from PyQt5 import QtWidgets, uic
 import sys
-import pyqtgraph as pg
+import glob
 import serial
 import datetime
 import csv
+import time
 from PyQt5 import QtWidgets, QtCore
-
-ser = serial.Serial(port='COM6', baudrate=921600)
+import concurrent.futures
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-
-        # self.is_record = False
+        self.port = None
         self.is_record = False
-        self.force = []
-        self.acceleration_x = []
-        self.acceleration_y = []
-        self.acceleration_z = []
-        self.gyroscope_x = []
-        self.gyroscope_y = []
-        self.gyroscope_z = []
-        self.data = []
-
         # Load the UI Page
-        uic.loadUi('src/ui/main.ui', self)
+        uic.loadUi("src/ui/main.ui", self)
+        # self.port_scan()
+        self.startRecordBtn.clicked.connect(self.start_record)
+        self.stopRecordBtn.clicked.connect(self.stop_record)
+        self.portScan.clicked.connect(self.port_scan)
+        self.clearListBtn.clicked.connect(self.clearList)
 
-        # # button
-        self.startRecordBtn.clicked.connect(lambda: self.start_record())
-        self.stopRecordBtn.clicked.connect(lambda: self.stop_record())
-
-        # ... init continued ...
-        self.timer = QtCore.QTimer()
-        # Recording data
-        self.timer.timeout.connect(lambda: self.record_data())
-        # self.timer.timeout.connect(lambda: self.update_data_force_on_bag())
-        self.timer.start()
+    def clearList(self):
+        print("clear list")
+        self.listPorts.clear()
 
     def start_record(self):
-        self.sample_rate.setText("Recording")
         if self.is_record == True:
             print("Already Recording")
         else:
-            print("Start Recording")
             self.is_record = True
+            self.ser = serial.Serial(port=self.port)
+            self.sample_rate.setText("Recording")
+            self.data = []
+            print("Start Recording")
+
+            # ... init continued ...
+            self.timer = QtCore.QTimer()
+            self.timer.timeout.connect(lambda: self.record_data())
+            self.timer.start()
 
     def stop_record(self):
-        self.export_to_csv()
-        self.sample_rate.setText("Stop")
-        print("Stop Recording")
-        # Empty data before record a new one
-        self.is_record = False
-        self.acceleration_x = []
-        self.acceleration_y = []
-        self.acceleration_z = []
-        self.gyroscope_x = []
-        self.gyroscope_y = []
-        self.gyroscope_z = []
-        self.data = []
+        if self.is_record == True:
+            self.is_record = False
+            self.ser.close()
+            self.sample_rate.setText("Stop")
+            print("Stop Recording")
+            # Empty data before record a new one
+            self.export_to_csv()
+            self.data = []
+        else:
+            print("Haven't record anything yet")
 
     def record_data(self):
         if self.is_record == True:
-            b = ser.readline()
             try:
-                string_n = b.decode()
-                [force, a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
-                print(force + ' ' + a_x + ' ' + a_y + ' ' + a_z + ' ' + g_x + ' ' + g_y + ' ' + g_z + ' ')
-                self.force.append(float(force))
-                self.acceleration_x.append(float(a_x))
-                self.acceleration_y.append(float(a_y))
-                self.acceleration_z.append(float(a_z))
-                self.gyroscope_x.append(float(g_x))
-                self.gyroscope_y.append(float(g_y))
-                self.gyroscope_z.append(float(g_z))
+                b = self.ser.readline()
+                string_n = b.decode().splitlines()
+                self.data.append(string_n)
             except Exception as e:
-                print(b)
                 print(e)
 
     def export_to_csv(self):
-        # import rows to columns
-        # https://stackoverflow.com/questions/4155106/python-csv-write-by-column-rather-than-row
-        l = [
-            self.force,
-            self.acceleration_x,
-            self.acceleration_y,
-            self.acceleration_z,
-            self.gyroscope_x,
-            self.gyroscope_y,
-            self.gyroscope_z,
-        ]
-        data = zip(*l)
-
-        header = ['force', 'a_x', 'a_y', 'a_z', 'g_x', 'g_y', 'g_z']
-
+        header = ["force a_x a_y a_z g_x g_y g_z"]
         # filename: dd-mm-YYYY hh:mm:ss
         name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
-        name_format = name_format.replace(':', "-")
+        name_format = name_format.replace(":", "-")
         filename = name_format + ".csv"
 
-        with open(filename, 'w', encoding='UTF8', newline='') as f:
+        with open(filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(header)
             # write multiple rows
-            writer.writerows(data)
+            writer.writerows(self.data)
 
-    def update_data_force_on_bag(self):
+    def port_scan(self):
+        self.listPorts.clear()
+        print("Start scaning")
+        # r = executor.submit(self.serial_ports)
+        r = self.serial_ports()
+        if len(r):
+            self.listPorts.addItems(r)
+            print("Scanning completeted")
+            self.listPorts.itemClicked.connect(self.getItem)
+        else:
+            print("No ports available")
 
-        length = 500
+    def getItem(self):
+        print("Selected port: " + self.listPorts.currentItem().text())
+        self.port = self.listPorts.currentItem().text()
 
-        self.x = list(range(length))
-        self.force = [0 for _ in range(length)]
-        self.force_graph.setBackground('w')
+    # https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python
+    def serial_ports(self):
+        """Lists serial port names
 
-        # # Add legend (line name)
-        self.force_graph.addLegend()
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+        """
+        if sys.platform.startswith("win"):
+            # ports = ['COM%s' % (i + 1) for i in range(256)]
+            ports = ["COM%s" % (i + 1) for i in range(8)]
+        elif sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):
+            # this excludes your current terminal "/dev/tty"
+            ports = glob.glob("/dev/tty[A-Za-z]*")
+        elif sys.platform.startswith("darwin"):
+            ports = glob.glob("/dev/tty.*")
+        else:
+            raise EnvironmentError("Unsupported platform")
 
-        # # Add Title
-        self.force_graph.setTitle("Force Graph", color="b", size="10pt")
-
-        width = 1
-        pen_force_graph = pg.mkPen('r', width=width)
-
-        self.data_line_force_graph = self.force_graph.plot(
-            self.x, self.force, pen=pen_force_graph, name="force")
-
-        self.x = self.x[1:]  # Remove the first y element.
-        # Add a new value 1 higher than the last.
-        self.x.append(self.x[-1] + 1)
-        b = ser.readline()
-        # Cannot decode the 1st value b'\xb4j7\r\n'
-        # solve this with try except
-        try:
-            string_n = b.decode()
-            print(string_n)
-            [force, a_x, a_y, a_z, g_x, g_y, g_z] = string_n.split()
-            # Acceleration
-            self.force = self.force[1:]
-            self.force.append(float(force))
-        except Exception as e:
-            print(e)
-        # Update the data.
-        self.data_line_force_graph.setData(self.x, self.force)
+        result = []
+        for port in ports:
+            try:
+                s = serial.Serial(port)
+                s.close()
+                result.append(port)
+            except (OSError, serial.SerialException):
+                pass
+        return result
 
 
 def main():
@@ -151,5 +129,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
