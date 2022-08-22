@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.sample_rate.setText("Stop")
             print("Stop Recording")
             # Empty data before record a new one
-            self.export_to_csv()
+            self.export2csv()
             self.data_on_bag = []
             self.data_on_hand = []
         else:
@@ -74,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 print(e)
 
-    def export_to_csv(self):
+    def export2csv(self):
         # filename: dd-mm-YYYY hh:mm:ss
         name_format = datetime.datetime.now().strftime("%x %X").replace(
             "/", "-")
@@ -114,7 +114,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port_on_bag = self.portOnHand.currentText()
 
     def portOnBagChange(self):
-        self.port_on_hand = self.portOnHand.currentText()
+        self.port_on_hand = self.portOnBag.currentText()
 
     # https://stackoverflow.com/questions/55816358/how-to-obtain-bluetooth-port-direction-with-pyserial
     def serial_ports(self):
