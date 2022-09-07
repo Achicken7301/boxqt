@@ -1,3 +1,4 @@
 (fp_lib_table
   (lib (name "SparkFun_Tri_Axis_Accel_Breakout-H3LIS331DL")(type "KiCad")(uri "D:/banhb/Documents/Kicad/libraries/custom/SparkFun_Tri_Axis_Accel_Breakout-H3LIS331DL_1/SparkFun_Tri_Axis_Accel_Breakout-H3LIS331DL.pretty")(options "")(descr ""))
+  (lib (name "ESP32_mini")(type "KiCad")(uri "D:/banhb/Documents/Kicad/libraries/custom/ESP32_mini_KiCad_Library/ESP32_mini.pretty")(options "")(descr ""))
 )
