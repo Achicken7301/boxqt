@@ -32,13 +32,15 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("Set is_record to True")
             self.is_record = True
-            print("Connect port ser on hand")
-            self.ser_on_hand = serial.Serial(port=self.port_on_hand)
             print("Connect port ser on bag")
             self.ser_on_bag = serial.Serial(port=self.port_on_bag)
-            self.sample_rate.setText("Recording")
             self.data_on_bag = []
+
+            print("Connect port ser on hand")
+            self.ser_on_hand = serial.Serial(port=self.port_on_hand)
             self.data_on_hand = []
+
+            self.sample_rate.setText("Recording")
             print("Start Recording")
 
             # ... init continued ...
@@ -65,12 +67,11 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 data_ser_on_bag = self.ser_on_bag.readline()
                 data_ser_on_bag = data_ser_on_bag.decode().splitlines()
-
+                self.data_on_bag.append(data_ser_on_bag)
                 data_ser_on_hand = self.ser_on_hand.readline()
                 data_ser_on_hand = data_ser_on_hand.decode().splitlines()
-
-                self.data_on_bag.append(data_ser_on_hand)
-                self.data_on_hand.append(data_ser_on_bag)
+                self.data_on_hand.append(data_ser_on_hand)
+                # print(data_ser_on_bag)
             except Exception as e:
                 print(e)
 
@@ -81,13 +82,13 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = name_format.replace(":", "-")
         filename = name_format + ".csv"
 
-        with open("Hand " + filename, "w", encoding="UTF8", newline="") as f:
+        with open("Bag " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["a_x,a_y,a_z,f"])
             # write multiple rows
             writer.writerows(self.data_on_bag)
 
-        with open("Bag " + filename, "w", encoding="UTF8", newline="") as f:
+        with open("Hand " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["a_x,a_y,a_z,g_x,g_y,g_z"])
             # write multiple rows

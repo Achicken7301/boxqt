@@ -18,5 +18,4 @@ for p in cp:
         print(p.name, address, port_type)
         if port_type == "outgoing":
             port.append(p.name)
-
 print(port)

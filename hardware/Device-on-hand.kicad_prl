@@ -62,11 +62,11 @@
       35,
       36
     ],
-    "visible_layers": "7ffffff_80000001",
+    "visible_layers": "fffffff_ffffffff",
     "zone_display_mode": 0
   },
   "meta": {
-    "filename": "test2.kicad_prl",
+    "filename": "Device-on-hand.kicad_prl",
     "version": 3
   },
   "project": {

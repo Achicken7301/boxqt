@@ -239,7 +239,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "boxing.kicad_pro",
+    "filename": "Device-on-hand.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -318,7 +318,7 @@
   },
   "sheets": [
     [
-      "0cd6873f-e609-49b2-8123-ded0665bd15d",
+      "74a7bf94-06e5-4e74-8fd4-8eb6e765186c",
       ""
     ]
   ],
