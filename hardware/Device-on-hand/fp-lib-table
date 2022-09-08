@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "ESP32_mini")(type "KiCad")(uri "D:/banhb/Documents/Kicad/libraries/custom/ESP32_mini_KiCad_Library/ESP32_mini.pretty")(options "")(descr ""))
+)
