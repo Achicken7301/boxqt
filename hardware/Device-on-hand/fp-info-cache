@@ -1,4 +1,4 @@
-20417161083639623
+20418823618099871
 3362P-1-103LF
 3362P_1
 3362P
@@ -52135,6 +52135,13 @@ MODULE_ESP32_DEVKIT_V1
 0
 30
 30
+ESP32_mini
+ESP32_mini
+
+
+0
+40
+40
 Ferrite_THT
 LairdTech_28C0236-0JW-10
 Ferrite, vertical, LairdTech 28C0236-0JW-10, https://assets.lairdtech.com/home/brandworld/files/28C0236-0JW-10.pdf, JW Miller core https://www.bourns.com/products/magnetic-products/j.w.-miller-through-hole-ferrite-beads-emi-filters

@@ -9,16 +9,23 @@
 #define LSM_SCK 13
 #define LSM_MISO 12
 #define LSM_MOSI 11
+#include "BluetoothSerial.h"
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
+BluetoothSerial SerialBT;
 Adafruit_LSM6DSO32 dso32;
 void setup(void) {
+  SerialBT.begin("DeviceOnHandLSM6DSO32"); //Bluetooth device name
   Serial.begin(115200);
   while (!Serial) {
     delay(10); // will pause Zero, Leonardo, etc until serial console opens
   }
 
   Serial.println("Adafruit LSM6DSO32 test!");
-  if (!dso32.begin_I2C(0x6B)) {
+  if (!dso32.begin_I2C(0x6A)) {
     // if (!dso32.begin_SPI(LSM_CS)) {
     // if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
     Serial.println("Failed to find LSM6DSO32 chip");
@@ -67,6 +74,8 @@ void setup(void) {
     case ISM330DHCX_GYRO_RANGE_4000_DPS:
       break; // unsupported range for the DSO32
   }
+  dso32.setGyroDataRate(LSM6DS_RATE_833_HZ);
+  dso32.setAccelDataRate(LSM6DS_RATE_833_HZ);
 }
 
 void loop() {
@@ -104,8 +113,8 @@ void loop() {
 
   //  // serial plotter friendly format
 
-  Serial.print(temp.temperature);
-  Serial.print(",");
+  //  Serial.print(temp.temperature);
+  //  Serial.print(",");
 
   Serial.print(accel.acceleration.x);
   Serial.print(","); Serial.print(accel.acceleration.y);
@@ -116,5 +125,15 @@ void loop() {
   Serial.print(","); Serial.print(gyro.gyro.y);
   Serial.print(","); Serial.print(gyro.gyro.z);
   Serial.println();
-  delay(10);
+
+  SerialBT.print(accel.acceleration.x);
+  SerialBT.print(","); SerialBT.print(accel.acceleration.y);
+  SerialBT.print(","); SerialBT.print(accel.acceleration.z);
+  SerialBT.print(",");
+
+  SerialBT.print(gyro.gyro.x);
+  SerialBT.print(","); SerialBT.print(gyro.gyro.y);
+  SerialBT.print(","); SerialBT.print(gyro.gyro.z);
+  SerialBT.println();
+  //  delay(10);
 }
