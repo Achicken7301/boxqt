@@ -82,15 +82,15 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = name_format.replace(":", "-")
         filename = name_format + ".csv"
 
-        with open("Bag " + filename, "w", encoding="UTF8", newline="") as f:
+        with open("data1 " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["a_x,a_y,a_z,f"])
+            writer.writerow(["a_x a_y a_z g_x g_y g_z"])
             # write multiple rows
             writer.writerows(self.data_on_bag)
 
-        with open("Hand " + filename, "w", encoding="UTF8", newline="") as f:
+        with open("data2 " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["a_x,a_y,a_z,g_x,g_y,g_z"])
+            writer.writerow(["a_x a_y a_z f"])
             # write multiple rows
             writer.writerows(self.data_on_hand)
 
