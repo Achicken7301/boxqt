@@ -25,7 +25,7 @@ void setup(void) {
   }
 
   Serial.println("Adafruit LSM6DSO32 test!");
-  if (!dso32.begin_I2C(0x6A)) {
+  if (!dso32.begin_I2C(0x6B)) {
     // if (!dso32.begin_SPI(LSM_CS)) {
     // if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
     Serial.println("Failed to find LSM6DSO32 chip");
@@ -135,5 +135,5 @@ void loop() {
   SerialBT.print(","); SerialBT.print(gyro.gyro.y);
   SerialBT.print(","); SerialBT.print(gyro.gyro.z);
   SerialBT.println();
-  //  delay(10);
+//    delay(20);
 }
