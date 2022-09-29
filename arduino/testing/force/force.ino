@@ -36,10 +36,13 @@ void loop() {
   //  return result;
   //}
   //  100 = maxScale
-  Serial.print(xl.convertToG(100, x)); Serial.print(" ");
-  Serial.print(xl.convertToG(100, y)); Serial.print(" ");
-  Serial.print(xl.convertToG(100, z)); Serial.print(" ");
-  Serial.println(potValue);
+  
+//  Serial.print(millis()); Serial.print(" ");
+//  Serial.print(xl.convertToG(100, x)); Serial.print(" ");
+//  Serial.print(xl.convertToG(100, y)); Serial.print(" ");
+//  Serial.print(xl.convertToG(100, z)); Serial.print(" ");
+//  Serial.println(potValue);
+  SerialBT.print(millis()); SerialBT.print(" ");
   SerialBT.print(xl.convertToG(100, x)); SerialBT.print(" ");
   SerialBT.print(xl.convertToG(100, y)); SerialBT.print(" ");
   SerialBT.print(xl.convertToG(100, z)); SerialBT.print(" ");

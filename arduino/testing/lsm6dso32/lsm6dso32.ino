@@ -115,25 +115,25 @@ void loop() {
 
   //  Serial.print(temp.temperature);
   //  Serial.print(",");
+  
+//  Serial.print(millis()); Serial.print(","); 
+//  Serial.print(accel.acceleration.x);
+//  Serial.print(","); Serial.print(accel.acceleration.y);
+//  Serial.print(","); Serial.print(accel.acceleration.z);
+//  Serial.print(",");
+//
+//  Serial.print(gyro.gyro.x);
+//  Serial.print(","); Serial.print(gyro.gyro.y);
+//  Serial.print(","); Serial.print(gyro.gyro.z);
+//  Serial.println();
 
-  Serial.print(accel.acceleration.x);
-  Serial.print(","); Serial.print(accel.acceleration.y);
-  Serial.print(","); Serial.print(accel.acceleration.z);
-  Serial.print(",");
+  SerialBT.print(millis()); SerialBT.print(","); 
+  SerialBT.print(accel.acceleration.x); SerialBT.print(","); 
+  SerialBT.print(accel.acceleration.y); SerialBT.print(","); 
+  SerialBT.print(accel.acceleration.z); SerialBT.print(",");
 
-  Serial.print(gyro.gyro.x);
-  Serial.print(","); Serial.print(gyro.gyro.y);
-  Serial.print(","); Serial.print(gyro.gyro.z);
-  Serial.println();
-
-  SerialBT.print(accel.acceleration.x);
-  SerialBT.print(","); SerialBT.print(accel.acceleration.y);
-  SerialBT.print(","); SerialBT.print(accel.acceleration.z);
-  SerialBT.print(",");
-
-  SerialBT.print(gyro.gyro.x);
-  SerialBT.print(","); SerialBT.print(gyro.gyro.y);
-  SerialBT.print(","); SerialBT.print(gyro.gyro.z);
+  SerialBT.print(gyro.gyro.x); SerialBT.print(","); 
+  SerialBT.print(gyro.gyro.y); SerialBT.print(","); 
+  SerialBT.print(gyro.gyro.z);
   SerialBT.println();
-//    delay(20);
 }
