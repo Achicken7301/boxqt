@@ -18,7 +18,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.startRecordBtn.clicked.connect(self.startRecord)
         self.stopRecordBtn.clicked.connect(self.stopRecord)
         self.uiPortScan.clicked.connect(self.portScan)
-        self.clearListBtn.clicked.connect(self.clearList)
 
     def clearList(self):
         print("clear list")
