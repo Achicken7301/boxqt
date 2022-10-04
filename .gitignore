@@ -5,3 +5,5 @@
 /*.csv
 test.py
 /env
+/clean_data
+/raw_data
