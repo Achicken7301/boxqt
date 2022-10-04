@@ -24,7 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def clearList(self):
         print("clear list")
         self.portOnHand.clear()
-        self.portOnBag.clear()
+        # self.portOnBag.clear()
 
     def startRecord(self):
         if self.is_record == True:
@@ -32,9 +32,9 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("Set is_record to True")
             self.is_record = True
-            print("Connect port ser on bag")
-            self.ser_on_bag = serial.Serial(port=self.port_on_bag)
-            self.data_on_bag = []
+            # print("Connect port ser on bag")
+            # self.ser_on_bag = serial.Serial(port=self.port_on_bag)
+            # self.data_on_bag = []
 
             print("Connect port ser on hand")
             self.ser_on_hand = serial.Serial(port=self.port_on_hand)
@@ -52,12 +52,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.is_record == True:
             self.is_record = False
             self.ser_on_hand.close()
-            self.ser_on_bag.close()
+            # self.ser_on_bag.close()
             self.sample_rate.setText("Stop")
             print("Stop Recording")
             # Empty data before record a new one
             self.export2csv()
-            self.data_on_bag = []
+            # self.data_on_bag = []
             self.data_on_hand = []
         else:
             print("Haven't record anything yet")
@@ -65,9 +65,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def recordData(self):
         if self.is_record == True:
             try:
-                data_ser_on_bag = self.ser_on_bag.readline()
-                data_ser_on_bag = data_ser_on_bag.decode().splitlines()
-                self.data_on_bag.append(data_ser_on_bag)
+                # data_ser_on_bag = self.ser_on_bag.readline()
+                # data_ser_on_bag = data_ser_on_bag.decode().splitlines()
+                # self.data_on_bag.append(data_ser_on_bag)
                 data_ser_on_hand = self.ser_on_hand.readline()
                 data_ser_on_hand = data_ser_on_hand.decode().splitlines()
                 self.data_on_hand.append(data_ser_on_hand)
@@ -82,11 +82,11 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = name_format.replace(":", "-")
         filename = name_format + ".csv"
 
-        with open("data1 " + filename, "w", encoding="UTF8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["millis, a_x, a_y, a_z, g_x, g_y, g_z"])
-            # write multiple rows
-            writer.writerows(self.data_on_bag)
+        # with open("data1 " + filename, "w", encoding="UTF8", newline="") as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(["millis, a_x, a_y, a_z, g_x, g_y, g_z"])
+        #     # write multiple rows
+        #     writer.writerows(self.data_on_bag)
 
         with open("data2 " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
@@ -100,22 +100,22 @@ class MainWindow(QtWidgets.QMainWindow):
         print(r)
         if len(r):
             self.portOnHand.clear()
-            self.portOnBag.clear()
+            # self.portOnBag.clear()
             self.portOnHand.addItems(r)
-            self.portOnBag.addItems(r)
+            # self.portOnBag.addItems(r)
             self.portOnHand.currentTextChanged.connect(self.portOnHandChange)
-            self.portOnBag.currentTextChanged.connect(self.portOnBagChange)
-            self.port_on_bag = self.portOnHand.currentText()
+            # self.portOnBag.currentTextChanged.connect(self.portOnBagChange)
+            # self.port_on_bag = self.portOnHand.currentText()
             self.port_on_hand = self.portOnHand.currentText()
             print("Scanning completeted")
         else:
             print("No ports available")
 
     def portOnHandChange(self):
-        self.port_on_bag = self.portOnHand.currentText()
+        self.port_on_hand = self.portOnHand.currentText()
 
-    def portOnBagChange(self):
-        self.port_on_hand = self.portOnBag.currentText()
+    # def portOnBagChange(self):
+    #     self.port_on_bag = self.portOnBag.currentText()
 
     # https://stackoverflow.com/questions/55816358/how-to-obtain-bluetooth-port-direction-with-pyserial
     def serial_ports(self):
