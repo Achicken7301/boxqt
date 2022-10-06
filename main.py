@@ -53,6 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.is_record = False
             self.ser_on_hand.close()
             self.ser_on_bag.close()
+            self.timer.stop()
             self.sample_rate.setText("Stop")
             print("Stop Recording")
             # Empty data before record a new one
