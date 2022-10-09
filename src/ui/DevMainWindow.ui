@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>159</height>
+    <width>349</width>
+    <height>111</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,12 +15,8 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="1">
-     <widget class="QLabel" name="sample_rate">
-      <property name="text">
-       <string>Suspending</string>
-      </property>
-     </widget>
+    <item row="1" column="3">
+     <widget class="QComboBox" name="portOnHand"/>
     </item>
     <item row="1" column="0">
      <widget class="QPushButton" name="startRecordBtn">
@@ -29,34 +25,38 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
+    <item row="3" column="0">
+     <widget class="QPushButton" name="stopRecordBtn">
+      <property name="text">
+       <string>Stop Recording</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
      <widget class="QLabel" name="label_2">
       <property name="text">
        <string>Select port:</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="3">
-     <widget class="QComboBox" name="portOnHand"/>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Recording Status:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="5">
+    <item row="1" column="4">
      <widget class="QPushButton" name="uiPortScan">
       <property name="text">
        <string>Scan ports</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="stopRecordBtn">
+    <item row="3" column="2">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>Stop Recording</string>
+       <string>Recording Status:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QLabel" name="sample_rate">
+      <property name="text">
+       <string>Suspending</string>
       </property>
      </widget>
     </item>
@@ -67,8 +67,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>493</width>
-     <height>26</height>
+     <width>349</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Profile">
