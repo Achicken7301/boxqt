@@ -18,7 +18,7 @@
 BluetoothSerial SerialBT;
 Adafruit_LSM6DSO32 dso32;
 void setup(void) {
-  SerialBT.begin("DeviceOnHandLSM6DSO32"); //Bluetooth device name
+  SerialBT.begin("DeviceOnBagLSM6DSO32"); //Bluetooth device name
   Serial.begin(115200);
   while (!Serial) {
     delay(10); // will pause Zero, Leonardo, etc until serial console opens
@@ -34,48 +34,12 @@ void setup(void) {
     }
   }
 
-  Serial.println("LSM6DSO32 Found!");
+//  Serial.println("LSM6DSO32 Found!");
 
   dso32.setAccelRange(LSM6DSO32_ACCEL_RANGE_32_G);
-  Serial.print("Accelerometer range set to: ");
-  switch (dso32.getAccelRange()) {
-    case LSM6DSO32_ACCEL_RANGE_4_G:
-      Serial.println("+-4G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_8_G:
-      Serial.println("+-8G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_16_G:
-      Serial.println("+-16G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_32_G:
-      Serial.println("+-32G");
-      break;
-  }
-
   dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS );
-  Serial.print("Gyro range set to: ");
-  switch (dso32.getGyroRange()) {
-    case LSM6DS_GYRO_RANGE_125_DPS:
-      Serial.println("125 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_250_DPS:
-      Serial.println("250 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_500_DPS:
-      Serial.println("500 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_1000_DPS:
-      Serial.println("1000 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_2000_DPS:
-      Serial.println("2000 degrees/s");
-      break;
-    case ISM330DHCX_GYRO_RANGE_4000_DPS:
-      break; // unsupported range for the DSO32
-  }
-  dso32.setGyroDataRate(LSM6DS_RATE_833_HZ);
-  dso32.setAccelDataRate(LSM6DS_RATE_833_HZ);
+  dso32.setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
+  dso32.setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
 }
 
 void loop() {
@@ -117,23 +81,23 @@ void loop() {
   //  Serial.print(",");
   
 //  Serial.print(millis()); Serial.print(","); 
-//  Serial.print(accel.acceleration.x);
-//  Serial.print(","); Serial.print(accel.acceleration.y);
-//  Serial.print(","); Serial.print(accel.acceleration.z);
-//  Serial.print(",");
-//
-//  Serial.print(gyro.gyro.x);
-//  Serial.print(","); Serial.print(gyro.gyro.y);
-//  Serial.print(","); Serial.print(gyro.gyro.z);
-//  Serial.println();
+  Serial.print(accel.acceleration.x);
+  Serial.print(","); Serial.print(accel.acceleration.y);
+  Serial.print(","); Serial.print(accel.acceleration.z);
+  Serial.print(",");
 
-  SerialBT.print(millis()); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.x); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.y); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.z); SerialBT.print(",");
+  Serial.print(gyro.gyro.x);
+  Serial.print(","); Serial.print(gyro.gyro.y);
+  Serial.print(","); Serial.print(gyro.gyro.z);
+  Serial.println();
 
-  SerialBT.print(gyro.gyro.x); SerialBT.print(","); 
-  SerialBT.print(gyro.gyro.y); SerialBT.print(","); 
-  SerialBT.print(gyro.gyro.z);
+//  SerialBT.print(millis()); SerialBT.print(","); 
+  SerialBT.write(accel.acceleration.x); SerialBT.write(","); 
+  SerialBT.write(accel.acceleration.y); SerialBT.write(","); 
+  SerialBT.write(accel.acceleration.z); SerialBT.write(",");
+
+  SerialBT.write(gyro.gyro.x); SerialBT.write(","); 
+  SerialBT.write(gyro.gyro.y); SerialBT.write(","); 
+  SerialBT.write(gyro.gyro.z);
   SerialBT.println();
 }
