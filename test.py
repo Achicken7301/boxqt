@@ -1,22 +1,14 @@
-import serial.tools.list_ports
+import pandas as pd
 
-# https://stackoverflow.com/questions/55816358/how-to-obtain-bluetooth-port-direction-with-pyserial
 
-port = []
+resolution_of_ADC = 4095
+system_voltage = 3.3
+R_0 = 220
+ADC_reading = 595
 
-cp = serial.tools.list_ports.comports()
-for p in cp:
-    if "BTHENUM" in p.hwid:
-        start_of_address = p.hwid.rfind("&")
-        end_of_address = p.hwid.rfind("_")
-        address = p.hwid[start_of_address + 1:end_of_address]
-        if int(address, 16) == 0:
-            port_type = "incoming"
-        else:
-            port_type = "outgoing"
-        print(p.hwid)
-        print(p.name, address, port_type)
-        if port_type == "outgoing":
-            port.append(p.name)
+V_meas = system_voltage * ADC_reading / resolution_of_ADC
 
-print(port)
+mass = 271000 / (R_0 * ((system_voltage / V_meas) - 1))
+mass = pow(mass, 1 / 0.69)
+print("Voltage measure: " + str(V_meas))
+print("Mass: " + str(mass))

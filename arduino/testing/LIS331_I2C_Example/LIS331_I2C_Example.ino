@@ -22,9 +22,9 @@ void loop()
   //  return result;
   //}
   //  200 = maxScale
-  Serial.print(xl.convertToG(200, x)); Serial.print(" ");
-  Serial.print(xl.convertToG(200, y)); Serial.print(" ");
-  Serial.println(xl.convertToG(200, z));
+  Serial.print(xl.convertToG(100, x)); Serial.print(" ");
+  Serial.print(xl.convertToG(100, y)); Serial.print(" ");
+  Serial.println(xl.convertToG(100, z));
 
 
 }

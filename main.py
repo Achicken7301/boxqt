@@ -10,7 +10,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.port = "COM6"
+        # self.port = "COM6"
+        self.baudrate = 115200
         self.is_record = False
         # Load the UI Page
         uic.loadUi("src/ui/DevMainWindow.ui", self)
@@ -31,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.is_record = True
 
             print("Connect port ser on hand")
-            self.ser = serial.Serial(port=self.port, baudrate=115200)
+            self.ser = serial.Serial(port=self.port, baudrate=self.baudrate)
             self.data = []
 
             self.sample_rate.setText("Recording")
@@ -74,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         with open("data2 " + filename, "w", encoding="UTF8", newline="") as f:
             writer = csv.writer(f)
-            # writer.writerow(["a_x, a_y, a_z, g_x, g_y, g_z"])
+            writer.writerow(["ax,ay,az,gx,gy,gz"])
             # write multiple rows
             writer.writerows(self.data)
 

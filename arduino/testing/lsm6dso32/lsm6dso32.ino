@@ -3,11 +3,11 @@
 #include "BluetoothSerial.h"
 
 // For SPI mode, we need a CS pin
-#define LSM_CS 15
+#define LSM_CS    5
 // For software-SPI mode we need SCK/MOSI/MISO pins
-#define LSM_SCK 18
-#define LSM_MISO 19
-#define LSM_MOSI 23
+#define LSM_SCK   18
+#define LSM_MISO  19
+#define LSM_MOSI  23
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -18,7 +18,7 @@ Adafruit_LSM6DSO32 dso32;
 
 void setup(void) {
   SerialBT.begin("DeviceOnBag"); //Bluetooth device name
-  Serial.begin(1000*1000);
+  Serial.begin(1000 * 1000);
   //  if (!dso32.begin_I2C(0x6B)) {
   // if (!dso32.begin_SPI(LSM_CS)) {
   if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {

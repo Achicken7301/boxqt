@@ -1,9 +1,11 @@
-from traceback import print_tb
+from ast import If
+from random import sample
+from socket import if_nameindex
 import serial
 import serial.tools.list_ports
 import time
 
-# print(serial.version)
+
 def serial_ports():
     port = []
     cp = serial.tools.list_ports.comports()
@@ -21,25 +23,32 @@ def serial_ports():
                 port.append(p.name)
     return port
 
+
 ports = serial_ports()
 print(ports)
 
-ser = serial.Serial(port='COM6', baudrate=115200)
+ser = serial.Serial(port="COM6", baudrate=1000000)
 # ser = serial.Serial(port='COM13', baudrate=115200)
 
 b = ser.readline()
 
-now = time.time()
-future = now + 1
+# now = time.time()
+start = time.time()
+# future = now + 1
+i = 0
 data = []
-while now < future:
+samples = 20
+while i < samples:
     # do stuff
-    now = time.time()
     b = ser.readline()
     data_ser = b.decode().splitlines()
     data.append(data_ser)
-    print(str(future - now))
-# print(data)
-print("Sample rate: " + str(len(data)))
-print(data[0])
+    i += 1
+    # print(str(future - now))
+# # print(data)
+# end = time.time()
+# print(end - start)
+# print("sample rate: " + str(float(samples) / (end - start)))
+print(type(data))
+
 ser.close()
