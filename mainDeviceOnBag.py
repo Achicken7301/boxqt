@@ -11,7 +11,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         # self.port = "COM6"
-        self.baudrate = 115200
+        self.baudrate = 1000*1000
         self.is_record = False
         # Load the UI Page
         uic.loadUi("src/ui/DevMainWindow.ui", self)

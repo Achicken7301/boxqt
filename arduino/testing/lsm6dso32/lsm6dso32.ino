@@ -19,9 +19,9 @@ Adafruit_LSM6DSO32 dso32;
 void setup(void) {
   SerialBT.begin("DeviceOnBag"); //Bluetooth device name
   Serial.begin(1000 * 1000);
-  //  if (!dso32.begin_I2C(0x6B)) {
-  // if (!dso32.begin_SPI(LSM_CS)) {
-  if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
+  if (!dso32.begin_I2C(0x6B)) {
+    // if (!dso32.begin_SPI(LSM_CS)) {
+    //  if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
     Serial.println("Failed to find LSM6DSO32 chip");
     while (1) {
       delay(10);
@@ -40,7 +40,7 @@ void loop() {
   sensors_event_t gyro;
   sensors_event_t temp;
   dso32.getEvent(&accel, &gyro, &temp);
-  Serial.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+  //  Serial.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
   SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
 
 }
