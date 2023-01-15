@@ -4,7 +4,10 @@ import serial
 import datetime
 import csv
 import serial.tools.list_ports
-
+import pandas as pd
+import pyqtgraph as pg
+import os
+import shutil
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -13,13 +16,26 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.port = "COM6"
         self.baudrate = 115200
         self.is_record = False
+        
         # Load the UI Page
         uic.loadUi("src/ui/DevMainWindow.ui", self)
+        
         self.portScan()
         self.startRecordBtn.clicked.connect(self.startRecord)
         self.stopRecordBtn.clicked.connect(self.stopRecord)
         self.uiPortScan.clicked.connect(self.portScan)
+        self.deleteFile.clicked.connect(self.deleteBtn)
+        self.moveFile.clicked.connect(self.moveFileBtn)
+        
+        
+    def deleteBtn(self):
+        print(self.filePath)
+        os.remove(self.filePath)
 
+    def moveFileBtn(self):
+        toDirectory = 'D:\laragon\www\\boxqt\data\\08.01.22\\'
+        shutil.move(self.filePath, toDirectory)
+        
     def clearList(self):
         print("clear list")
         self.portOnHand.clear()
@@ -71,13 +87,25 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = datetime.datetime.now().strftime("%x %X").replace(
             "/", "-")
         name_format = name_format.replace(":", "-")
-        filename = name_format + ".csv"
+        self.filename = name_format + ".csv"
+        self.filename = "Force " + self.filename
+        self.filePath = 'D:\laragon\www\\boxqt\\' + self.filename
+        
+        f_buffer = []
+        for i in range(len(self.data)):
+            try:
+                f_buffer.append(float(self.data[i][0]))
+            except Exception as e:
+                print(e)
 
-        with open("data2 " + filename, "w", encoding="UTF8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["f"])
-            # write multiple rows
-            writer.writerows(self.data)
+        # plot data: x, y values
+        self.my_widget.clear()
+        self.my_widget.plot(f_buffer)
+        
+        # Save data to csv
+        df = pd.DataFrame(list(zip(f_buffer)), columns=['f'])
+        
+        df.to_csv(self.filename)
 
     def portScan(self):
         print("Start scaning")

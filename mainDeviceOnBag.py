@@ -4,22 +4,40 @@ import serial
 import datetime
 import csv
 import serial.tools.list_ports
-
+import pandas as pd
+import pyqtgraph as pg
+import os
+import shutil
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        # self.port = "COM6"
-        self.baudrate = 1000*1000
+        self.port = "COM6"
+        self.baudrate = 1000 * 1000
         self.is_record = False
-        # Load the UI Page
         uic.loadUi("src/ui/DevMainWindow.ui", self)
+
+        self.my_widget.addLegend()
+        # Load the UI Page
         self.portScan()
         self.startRecordBtn.clicked.connect(self.startRecord)
         self.stopRecordBtn.clicked.connect(self.stopRecord)
         self.uiPortScan.clicked.connect(self.portScan)
+        self.deleteFile.clicked.connect(self.deleteBtn)
+        self.moveFile.clicked.connect(self.moveFileBtn)
 
+        # Timer
+        self.recordDataTimer = QtCore.QTimer()
+        self.recordDataTimer.timeout.connect(lambda: self.recordData())
+
+    def moveFileBtn(self):
+        toDirectory = 'D:\laragon\www\\boxqt\data\\08.01.22\\'
+        shutil.move(self.filePath, toDirectory)
+    
+    def deleteBtn(self):
+        os.remove(self.filePath)
+        
     def clearList(self):
         print("clear list")
         self.portOnHand.clear()
@@ -37,21 +55,27 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.sample_rate.setText("Recording")
             print("Start Recording")
-
-            # ... init continued ...
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(lambda: self.recordData())
-            self.timer.start()
+            
+            self.startRecordBtn.setEnabled(False)
+            self.stopRecordBtn.setEnabled(True)
+            
+            # TimerRun
+            self.recordDataTimer.start()  # Interupt every 1ms = 1000Hz
 
     def stopRecord(self):
         if self.is_record == True:
+            
+            self.startRecordBtn.setEnabled(True)
+            self.stopRecordBtn.setEnabled(False)
+            
             self.is_record = False
             self.ser.close()
-            self.timer.stop()
+            self.recordDataTimer.stop()
             self.sample_rate.setText("Stop")
             print("Stop Recording")
             # Empty data before record a new one
             self.export2csv()
+            
             self.data = []
         else:
             print("Haven't record anything yet")
@@ -71,13 +95,43 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = datetime.datetime.now().strftime("%x %X").replace(
             "/", "-")
         name_format = name_format.replace(":", "-")
-        filename = name_format + ".csv"
+        self.filename = name_format + ".csv"
+        self.filename = "AcelGyro " + self.filename
+        self.filePath = 'D:\laragon\www\\boxqt\\' + self.filename
+        # clean data
+        ax_buffer = []
+        ay_buffer = []
+        az_buffer = []
+        gx_buffer = []
+        gy_buffer = []
+        gz_buffer = []
+        for i in range(len(self.data)):
+            try:
+                ax, ay, az, gx, gy, gz = self.data[i][0].split(",")
+                ax_buffer.append(float(ax))
+                ay_buffer.append(float(ay))
+                az_buffer.append(float(az))
+                gx_buffer.append(float(gx))
+                gy_buffer.append(float(gy))
+                gz_buffer.append(float(gz))
+            except Exception as e:
+                print(e)
 
-        with open("data2 " + filename, "w", encoding="UTF8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["ax,ay,az,gx,gy,gz"])
-            # write multiple rows
-            writer.writerows(self.data)
+
+        # plot data: x, y values
+        self.my_widget.clear()
+        self.my_widget.plot(range(0, len(ax_buffer)), ax_buffer)
+        self.my_widget.plot(range(0, len(ax_buffer)), ay_buffer)
+        self.my_widget.plot(range(0, len(ax_buffer)), az_buffer)
+
+
+        df = pd.DataFrame(list(
+            zip(ax_buffer, ay_buffer, az_buffer, gx_buffer, gy_buffer,
+                gz_buffer)),
+                          columns=['ax', 'ay', 'az', 'gx', 'gy', 'gz'])
+
+        df.to_csv(self.filename)
+        
 
     def portScan(self):
         print("Start scaning")
