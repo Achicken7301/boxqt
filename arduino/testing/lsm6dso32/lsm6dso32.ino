@@ -1,139 +1,113 @@
-// Basic demo for accelerometer & gyro readings from Adafruit
-// LSM6DSO32 sensor
-
 #include <Adafruit_LSM6DSO32.h>
 #include <Wire.h>
+
+#define BLUETOOTH_MODE 1
+
 // For SPI mode, we need a CS pin
-#define LSM_CS 10
+#define LSM_CS    5
 // For software-SPI mode we need SCK/MOSI/MISO pins
-#define LSM_SCK 13
-#define LSM_MISO 12
-#define LSM_MOSI 11
+#define LSM_SCK   18
+#define LSM_MISO  19
+#define LSM_MOSI  23
+
+Adafruit_LSM6DSO32 dso32;
+
+#if BLUETOOTH_MODE
 #include "BluetoothSerial.h"
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-BluetoothSerial SerialBT;
-Adafruit_LSM6DSO32 dso32;
-void setup(void) {
-  SerialBT.begin("DeviceOnHandLSM6DSO32"); //Bluetooth device name
-  Serial.begin(115200);
-  while (!Serial) {
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
-  }
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
+#endif
 
-  Serial.println("Adafruit LSM6DSO32 test!");
+BluetoothSerial SerialBT;
+#endif
+
+int timer_counter = 0;
+int timer_flag = 0;
+int led_state = 0;
+int sampleRate = 10000; // 1000Hz
+
+#define CLOCK_TICK 0.1 //1ms
+
+hw_timer_t * timer = NULL;
+
+
+void setTimer(int duration) {
+  timer_counter = duration / CLOCK_TICK;
+  timer_flag = 0;
+}
+
+void timerRun() {
+  if (timer_counter > 0) {
+    timer_counter--;
+    if (timer_counter <= 0) timer_flag = 1;
+  }
+}
+
+void IRAM_ATTR onTimer() {
+  timerRun();
+}
+
+
+void setup() {
+#if BLUETOOTH_MODE
+  SerialBT.begin("AcelGryro"); //Bluetooth device name
+#endif
+
+  Serial.begin(1000 * 1000);
+  pinMode(LED_BUILTIN, OUTPUT);
+  
+  //  Create timer 1
+  timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
+  timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
+  unsigned int timerFactor = 1000000 / sampleRate;  //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
+  timerAlarmWrite(timer, timerFactor, true);          //Initialize the timer
+  timerAlarmEnable(timer);
+
+  setTimer(1000);
+
   if (!dso32.begin_I2C(0x6B)) {
     // if (!dso32.begin_SPI(LSM_CS)) {
-    // if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
+    //  if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
     Serial.println("Failed to find LSM6DSO32 chip");
     while (1) {
       delay(10);
     }
   }
 
-  Serial.println("LSM6DSO32 Found!");
-
   dso32.setAccelRange(LSM6DSO32_ACCEL_RANGE_32_G);
-  Serial.print("Accelerometer range set to: ");
-  switch (dso32.getAccelRange()) {
-    case LSM6DSO32_ACCEL_RANGE_4_G:
-      Serial.println("+-4G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_8_G:
-      Serial.println("+-8G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_16_G:
-      Serial.println("+-16G");
-      break;
-    case LSM6DSO32_ACCEL_RANGE_32_G:
-      Serial.println("+-32G");
-      break;
-  }
-
   dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS );
-  Serial.print("Gyro range set to: ");
-  switch (dso32.getGyroRange()) {
-    case LSM6DS_GYRO_RANGE_125_DPS:
-      Serial.println("125 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_250_DPS:
-      Serial.println("250 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_500_DPS:
-      Serial.println("500 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_1000_DPS:
-      Serial.println("1000 degrees/s");
-      break;
-    case LSM6DS_GYRO_RANGE_2000_DPS:
-      Serial.println("2000 degrees/s");
-      break;
-    case ISM330DHCX_GYRO_RANGE_4000_DPS:
-      break; // unsupported range for the DSO32
-  }
-  dso32.setGyroDataRate(LSM6DS_RATE_833_HZ);
-  dso32.setAccelDataRate(LSM6DS_RATE_833_HZ);
+  dso32.setGyroDataRate(LSM6DS_RATE_1_66K_HZ);
+  dso32.setAccelDataRate(LSM6DS_RATE_1_66K_HZ);
+
 }
 
-void loop() {
 
-  //  /* Get a new normalized sensor event */
+void loop() {
   sensors_event_t accel;
   sensors_event_t gyro;
   sensors_event_t temp;
   dso32.getEvent(&accel, &gyro, &temp);
 
-  //  Serial.print("\t\tTemperature ");
-  //  Serial.print(temp.temperature);
-  //  Serial.println(" deg C");
+  if (timer_flag == 1) {
+    setTimer(1000); // 1s
+    digitalWrite(LED_BUILTIN, led_state);
+    led_state = !led_state;
+    Serial.print(accel.acceleration.x);
+    Serial.print(","); Serial.print(accel.acceleration.y);
+    Serial.print(","); Serial.print(accel.acceleration.z);
+    Serial.print(",");
+    Serial.print(gyro.gyro.x);
+    Serial.print(","); Serial.print(gyro.gyro.y);
+    Serial.print(","); Serial.print(gyro.gyro.z);
+    Serial.println();
+  }
 
-  /* Display the results (acceleration is measured in m/s^2) */
-  //  Serial.print("\t\tAccel X: ");
-  //  Serial.print(accel.acceleration.x);
-  //  Serial.print(" \tY: ");
-  //  Serial.print(accel.acceleration.y);
-  //  Serial.print(" \tZ: ");
-  //  Serial.print(accel.acceleration.z);
-  //  Serial.println(" m/s^2 ");
-
-  /* Display the results (rotation is measured in rad/s) */
-  //  Serial.print("\t\tGyro X: ");
-  //  Serial.print(gyro.gyro.x);
-  //  Serial.print(" \tY: ");
-  //  Serial.print(gyro.gyro.y);
-  //  Serial.print(" \tZ: ");
-  //  Serial.print(gyro.gyro.z);
-  //  Serial.println(" radians/s ");
-  //  Serial.println();
-
-  //  delay(100);
-
-  //  // serial plotter friendly format
-
-  //  Serial.print(temp.temperature);
-  //  Serial.print(",");
-  
-//  Serial.print(millis()); Serial.print(","); 
-//  Serial.print(accel.acceleration.x);
-//  Serial.print(","); Serial.print(accel.acceleration.y);
-//  Serial.print(","); Serial.print(accel.acceleration.z);
-//  Serial.print(",");
-//
-//  Serial.print(gyro.gyro.x);
-//  Serial.print(","); Serial.print(gyro.gyro.y);
-//  Serial.print(","); Serial.print(gyro.gyro.z);
-//  Serial.println();
-
-  SerialBT.print(millis()); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.x); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.y); SerialBT.print(","); 
-  SerialBT.print(accel.acceleration.z); SerialBT.print(",");
-
-  SerialBT.print(gyro.gyro.x); SerialBT.print(","); 
-  SerialBT.print(gyro.gyro.y); SerialBT.print(","); 
-  SerialBT.print(gyro.gyro.z);
-  SerialBT.println();
+#if BLUETOOTH_MODE
+  SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+#endif
 }

@@ -1,50 +1,70 @@
-// Potentiometer is connected to GPIO 34 (Analog ADC1_CH6)
-const int potPin = 2;
-#include "SparkFun_LIS331.h"
-#include <Wire.h>
 #include "BluetoothSerial.h"
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
+#endif
+
 BluetoothSerial SerialBT;
 
-LIS331 xl;
-// variable for storing the potentiometer value
-int potValue = 0;
+
+int timer_counter = 0;
+int timer_flag = 0;
+
+int sampleRate = 1000; // 1000Hz
+
+#define CLOCK_TICK 1 //1ms
+
+hw_timer_t * timer = NULL;
+
+
+void setTimer(int duration) {
+  timer_counter = duration / CLOCK_TICK;
+  timer_flag = 0;
+}
+
+void timerRun() {
+  if (timer_counter > 0) {
+    timer_counter--;
+    if (timer_counter <= 0) timer_flag = 1;
+  }
+}
+
+void IRAM_ATTR onTimer() {
+  timerRun();
+}
+
+#define FORCE_PIN   2
 
 void setup() {
-  pinMode(potPin, INPUT);
-  SerialBT.begin("DeviceOnHand"); //Bluetooth device name
-  Wire.begin();
-  xl.setI2CAddr(0x19);
-  xl.begin(LIS331::USE_I2C);
   Serial.begin(115200);
+  pinMode(FORCE_PIN, INPUT);
+  SerialBT.begin("ForceFSR"); //Bluetooth device name
+
+  //  Create timer 1
+  timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
+  timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
+  unsigned int timerFactor = 1000000 / sampleRate;    //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
+  timerAlarmWrite(timer, timerFactor, true);          //Initialize the timer
+  timerAlarmEnable(timer);
+
+  setTimer(1000);
+}
+double Vmeas;
+
+double map_vmeas(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void loop() {
-  // Reading potentiometer value
-  int potValue = analogRead(potPin);
+  Vmeas = map_vmeas(analogRead(FORCE_PIN), 0.0, 4095.0, 0.0, 3.3);
+//  if (timer_flag == 1) {
+//    setTimer(1000);
+//    Serial.printf("%d\n", analogRead(FORCE_PIN));
+//  }
+  SerialBT.printf("%0.4f\n", Vmeas);
 
-  int16_t x, y, z;
-  xl.readAxes(x, y, z);  // The readAxes() function transfers the
-
-  //  float LIS331::convertToG(int maxScale, int reading)
-  //{
-  //  float result = (float(maxScale) * float(reading))/2047;
-  //  return result;
-  //}
-  //  100 = maxScale
-  
-//  Serial.print(millis()); Serial.print(" ");
-//  Serial.print(xl.convertToG(100, x)); Serial.print(" ");
-//  Serial.print(xl.convertToG(100, y)); Serial.print(" ");
-//  Serial.print(xl.convertToG(100, z)); Serial.print(" ");
-//  Serial.println(potValue);
-  SerialBT.print(millis()); SerialBT.print(" ");
-  SerialBT.print(xl.convertToG(100, x)); SerialBT.print(" ");
-  SerialBT.print(xl.convertToG(100, y)); SerialBT.print(" ");
-  SerialBT.print(xl.convertToG(100, z)); SerialBT.print(" ");
-  SerialBT.println(potValue);
 }
