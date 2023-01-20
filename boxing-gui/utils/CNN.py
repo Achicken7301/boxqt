@@ -12,17 +12,17 @@ az_window = []
 gx_window = []
 gy_window = []
 gz_window = []
-window_mask = [
-    ax_window, ay_window, az_window, gx_window, gy_window, gz_window
-]
+window_mask = [ax_window, ay_window, az_window, gx_window, gy_window, gz_window]
 
-def importModel():
+
+def importCnnModel():
     import tensorflow as tf
+
     global reloaded_model
     #  TODO SPEED THINGS UP
     # https://stackoverflow.com/questions/65298241/what-does-this-tensorflow-message-mean-any-side-effect-was-the-installation-su#:~:text=which%20can%20speed%20things%20up
-    reloaded_model = tf.keras.models.load_model(
-        'D:/laragon/www/boxqt/CNN/model')
+    reloaded_model = tf.keras.models.load_model("D:/laragon/www/boxqt/CNN/model")
+
 
 def process_raw_data(queue):
     # get 10 data 1st
@@ -42,14 +42,14 @@ def process_raw_data(queue):
             time.sleep(0.01)
         else:
             global reloaded_model
-            
+
             # Import data to window
             for _ in range(10):
                 for j in range(6):
                     window_mask[j].append(float(queue[j].pop(0)))
-            '''
+            """
             process data time cost: 8ms
-            '''
+            """
             process_window_data(
                 input,
                 window_mask[0],
@@ -59,14 +59,14 @@ def process_raw_data(queue):
                 window_mask[4],
                 window_mask[5],
             )
-            '''
+            """
             import data to window CNN and output force
             with condition a_mean TODO may change the condition for better performance
             lowest_acel is a aceleration value when no punch
             WARNING: increase memory when put data in the model.
-            '''
+            """
             lowest_acel = 10
-            if input['a_mean'][0] > lowest_acel:
+            if input["a_mean"][0] > lowest_acel:
                 force = reloaded_model.predict(input)
                 print("Force predict: " + str(force[0]))
 
@@ -75,9 +75,15 @@ def process_raw_data(queue):
                     window_mask[window_index].pop(0)
 
 
-def process_window_data(input: pd.DataFrame, ax_popped: list, ay_popped: list,
-                        az_popped: list, gx_popped: list, gy_popped: list,
-                        gz_popped: list):
+def process_window_data(
+    input: pd.DataFrame,
+    ax_popped: list,
+    ay_popped: list,
+    az_popped: list,
+    gx_popped: list,
+    gy_popped: list,
+    gz_popped: list,
+):
     ax_popped = pd.DataFrame(ax_popped)
     ax_mean = ax_popped.abs().mean()
     ax_std = ax_popped.std()
@@ -102,11 +108,7 @@ def process_window_data(input: pd.DataFrame, ax_popped: list, ay_popped: list,
     gz_mean = gz_popped.abs().mean()
     gz_std = gz_popped.std()
 
-    input['a_mean'] = pow(
-        pow(ax_mean, 2) + pow(ay_mean, 2) + pow(az_mean, 2), 1 / 2)
-    input['g_mean'] = pow(
-        pow(gx_mean, 2) + pow(gy_mean, 2) + pow(gz_mean, 2), 1 / 2)
-    input['a_std'] = pow(
-        pow(ax_std, 2) + pow(ay_std, 2) + pow(az_std, 2), 1 / 2)
-    input['g_std'] = pow(
-        pow(gx_std, 2) + pow(gy_std, 2) + pow(gz_std, 2), 1 / 2)
+    input["a_mean"] = pow(pow(ax_mean, 2) + pow(ay_mean, 2) + pow(az_mean, 2), 1 / 2)
+    input["g_mean"] = pow(pow(gx_mean, 2) + pow(gy_mean, 2) + pow(gz_mean, 2), 1 / 2)
+    input["a_std"] = pow(pow(ax_std, 2) + pow(ay_std, 2) + pow(az_std, 2), 1 / 2)
+    input["g_std"] = pow(pow(gx_std, 2) + pow(gy_std, 2) + pow(gz_std, 2), 1 / 2)

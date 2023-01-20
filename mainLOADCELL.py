@@ -9,33 +9,33 @@ import pyqtgraph as pg
 import os
 import shutil
 
-class MainWindow(QtWidgets.QMainWindow):
 
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+
+        # Load the UI Page
+        uic.loadUi("src/ui/DevMainWindow.ui", self)
+
         # self.port = "COM6"
         self.baudrate = 115200
         self.is_record = False
-        
-        # Load the UI Page
-        uic.loadUi("src/ui/DevMainWindow.ui", self)
-        
+
         self.portScan()
         self.startRecordBtn.clicked.connect(self.startRecord)
         self.stopRecordBtn.clicked.connect(self.stopRecord)
         self.uiPortScan.clicked.connect(self.portScan)
         self.deleteFile.clicked.connect(self.deleteBtn)
         self.moveFile.clicked.connect(self.moveFileBtn)
-        
-        
+
     def deleteBtn(self):
         print(self.filePath)
         os.remove(self.filePath)
 
     def moveFileBtn(self):
-        toDirectory = 'D:\laragon\www\\boxqt\data\\08.01.22\\'
+        toDirectory = "D:\laragon\www\\boxqt\data\\08.01.22\\"
         shutil.move(self.filePath, toDirectory)
-        
+
     def clearList(self):
         print("clear list")
         self.portOnHand.clear()
@@ -84,13 +84,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def export2csv(self):
         # filename: dd-mm-YYYY hh:mm:ss
-        name_format = datetime.datetime.now().strftime("%x %X").replace(
-            "/", "-")
+        name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
         name_format = name_format.replace(":", "-")
         self.filename = name_format + ".csv"
         self.filename = "Force " + self.filename
-        self.filePath = 'D:\laragon\www\\boxqt\\' + self.filename
-        
+        self.filePath = "D:\laragon\www\\boxqt\\" + self.filename
+
         f_buffer = []
         for i in range(len(self.data)):
             try:
@@ -101,10 +100,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # plot data: x, y values
         self.my_widget.clear()
         self.my_widget.plot(f_buffer)
-        
+
         # Save data to csv
-        df = pd.DataFrame(list(zip(f_buffer)), columns=['f'])
-        
+        df = pd.DataFrame(list(zip(f_buffer)), columns=["f"])
+
         df.to_csv(self.filename)
 
     def portScan(self):
@@ -131,7 +130,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if "BTHENUM" in p.hwid:
                 start_of_address = p.hwid.rfind("&")
                 end_of_address = p.hwid.rfind("_")
-                address = p.hwid[start_of_address + 1:end_of_address]
+                address = p.hwid[start_of_address + 1 : end_of_address]
                 if int(address, 16) == 0:
                     port_type = "incoming"
                 else:

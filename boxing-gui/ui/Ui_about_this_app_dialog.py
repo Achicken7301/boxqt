@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'about_this_app_dialog.ui'
+# Form implementation generated from reading ui file 'd:\laragon\www\boxqt\boxing-gui\ui\about_this_app_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -15,7 +15,7 @@ class Ui_AboutThisAppDialog(object):
     def setupUi(self, AboutThisAppDialog):
         AboutThisAppDialog.setObjectName("AboutThisAppDialog")
         AboutThisAppDialog.setWindowModality(QtCore.Qt.WindowModal)
-        AboutThisAppDialog.resize(400, 300)
+        AboutThisAppDialog.resize(504, 161)
         self.verticalLayout = QtWidgets.QVBoxLayout(AboutThisAppDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.label = QtWidgets.QLabel(AboutThisAppDialog)

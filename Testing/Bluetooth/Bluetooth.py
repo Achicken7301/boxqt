@@ -1,19 +1,19 @@
-from PyQt5 import QtBluetooth, QtCore
+# Copyright (C) 2022 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+"""PySide6 port of the bluetooth/btscanner example from Qt v6.x"""
+
+import sys
+
+from PyQt5.QtCore import QMetaObject
+from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtBluetooth import QBluetoothLocalDevice
+
+def bluetoothScaner():
+    qt = QBluetoothLocalDevice
+    print(qt.allDevices())
 
 
 
-localDevice = QtBluetooth.QBluetoothLocalDevice()
-
-# Check if Bluetooth is available on this device
-if localDevice.isValid():
-    # Turn Bluetooth on
-    localDevice.powerOn()
-    # Read local device name
-    localDeviceName = localDevice.name()
-    # Make it visible to others
-    localDevice.setHostMode(QtBluetooth.QBluetoothLocalDevice.HostDiscoverable)
-    # Get connected devices
-
-
-print(localDeviceName)
-    
+if __name__ == '__main__':
+    bluetoothScaner()

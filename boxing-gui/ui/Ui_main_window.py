@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_window.ui'
+# Form implementation generated from reading ui file 'd:\laragon\www\boxqt\boxing-gui\ui\main_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
         self.start_button = QtWidgets.QToolButton(self.centralwidget)
         self.start_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icons/start.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon.addPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/start.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.start_button.setIcon(icon)
         self.start_button.setIconSize(QtCore.QSize(24, 24))
         self.start_button.setAutoExclusive(False)
@@ -37,7 +37,7 @@ class Ui_MainWindow(object):
         self.stop_button.setEnabled(False)
         self.stop_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("icons/stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon1.addPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.stop_button.setIcon(icon1)
         self.stop_button.setIconSize(QtCore.QSize(24, 24))
         self.stop_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -53,7 +53,7 @@ class Ui_MainWindow(object):
         self.zero_button.setEnabled(False)
         self.zero_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("icons/zero.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon2.addPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/zero.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.zero_button.setIcon(icon2)
         self.zero_button.setIconSize(QtCore.QSize(24, 24))
         self.zero_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -68,7 +68,7 @@ class Ui_MainWindow(object):
         self.option_button = QtWidgets.QToolButton(self.centralwidget)
         self.option_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("icons/option.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon3.addPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/option.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.option_button.setIcon(icon3)
         self.option_button.setIconSize(QtCore.QSize(24, 24))
         self.option_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         self.zoom_button = QtWidgets.QToolButton(self.centralwidget)
         self.zoom_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("icons/zoom.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon4.addPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/zoom.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.zoom_button.setIcon(icon4)
         self.zoom_button.setIconSize(QtCore.QSize(24, 24))
         self.zoom_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -101,7 +101,7 @@ class Ui_MainWindow(object):
         self.label.setMaximumSize(QtCore.QSize(48, 48))
         self.label.setText("")
         self.label.setTextFormat(QtCore.Qt.PlainText)
-        self.label.setPixmap(QtGui.QPixmap("icons/logo.png"))
+        self.label.setPixmap(QtGui.QPixmap("d:\\laragon\\www\\boxqt\\boxing-gui\\ui\\icons/logo.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.toolbar_layout.addWidget(self.label)
@@ -326,13 +326,3 @@ class Ui_MainWindow(object):
         self.actionNew.setText(_translate("MainWindow", "New"))
         self.profile_options.setText(_translate("MainWindow", "Options"))
 from pyqtgraph import PlotWidget
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

@@ -21,3 +21,6 @@ def serial_ports():
             if port_type == "outgoing":
                 port.append(p.name)
     return port
+
+if __name__ == '__main__':
+    print(serial_ports())

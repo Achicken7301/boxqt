@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'profile_options.ui'
+# Form implementation generated from reading ui file 'd:\laragon\www\boxqt\boxing-gui\ui\profile_options.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -225,7 +225,7 @@ class Ui_ProfileSettings(object):
         self.user_weight_dimension.setText(_translate("ProfileSettings", "kg"))
         self.user_input_weight.setText(_translate("ProfileSettings", "0.0"))
         self.user_input_name.setText(_translate("ProfileSettings", "fullname"))
-        self.label_2.setText(_translate("ProfileSettings", "Name:"))
+        self.label_2.setText(_translate("ProfileSettings", "Full name:"))
         self.label_17.setText(_translate("ProfileSettings", "Age"))
         self.user_input_height.setText(_translate("ProfileSettings", "0.0"))
         self.user_height_dimension.setText(_translate("ProfileSettings", "cm"))
@@ -234,13 +234,3 @@ class Ui_ProfileSettings(object):
         self.label_19.setText(_translate("ProfileSettings", "**Measurement System**"))
         self.imperial_system_radioBtn.setText(_translate("ProfileSettings", "‎Imperial system"))
         self.metric_system_radioBtn.setText(_translate("ProfileSettings", "Metric system"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    ProfileSettings = QtWidgets.QDialog()
-    ui = Ui_ProfileSettings()
-    ui.setupUi(ProfileSettings)
-    ProfileSettings.show()
-    sys.exit(app.exec_())
