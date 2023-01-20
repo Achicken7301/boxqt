@@ -180,10 +180,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def profileOptionsTriggered(self, signal):
         dlg = ProfileOptionsDialog(self)
         # Load to ProfileVIew
-        if bag.hanging_style == False:
+        if bag.hanging_style == "False":
             ProfileOptionsDialog.freestanding_radioBtn_checked(dlg)
 
-        if user.metric_sys == False:
+        if user.metric_sys == "False":
             ProfileOptionsDialog.imperial_system_radioBtn_checked(dlg)
 
         # Punching bag

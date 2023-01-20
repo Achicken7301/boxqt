@@ -34,8 +34,8 @@ class User:
             user_infos = list(reader)
 
         for user_info in user_infos:
+            self.metric_sys = user_info.get("metric_sys")
             self.name = user_info.get("name")
-            self.metric_sys = user_info.get("meas_sys")
             self.age = int(user_info.get("age"))
             self.height = float(user_info.get("height"))
             self.weight = float(user_info.get("weight"))

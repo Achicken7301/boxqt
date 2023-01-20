@@ -8,7 +8,7 @@ class PunchingBag:
 
     def __init__(
         self,
-        hanging_style: int = 1,
+        hanging_style: int = True,
         length: float = 0.0,
         l2top: float = 0.0,
         l2btm: float = 0.0,
@@ -42,7 +42,6 @@ class PunchingBag:
     @staticmethod
     def saveSetting(bagInfos):
         bag_infos = bagInfos.__dict__
-        
         with open('boxing-gui/database/punching_bag.csv', 'w', newline='') as f:
             writer = csv.DictWriter(f, fieldnames=bag_infos.keys())
             writer.writeheader()
