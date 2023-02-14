@@ -21,27 +21,30 @@ def closeSer():
 
 
 def stopGetData():
-    global acel_gyro_ser, get_data_flag, process_raw_data_flag
+    global acel_gyro_ser, get_data_flag, process_raw_data_flag, view_data_thread
 
     acel_gyro_ser.close()
 
     # Condition to Cancel thread
     get_data_flag = True
     utils.CNN.process_raw_data_flag = True
+    view_data_thread = True
 
 
 def getSensorData(port: str, baudrate: int = 115200):
-    global get_data_flag, acel_gyro_ser, process_raw_data_flag
+    global get_data_flag, acel_gyro_ser, process_raw_data_flag, view_data_thread
 
     acel_gyro_ser = serial.Serial(port=port, baudrate=baudrate)
 
     # Condition to start thread
     get_data_flag = False
     utils.CNN.process_raw_data_flag = False
+    view_data_thread = False
 
 
 def importRawData():
     global acel_gyro_ser, get_data_flag
+    print("Start importRawData")
     while 1:
         if get_data_flag:
             break

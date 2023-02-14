@@ -1,11 +1,7 @@
 import pandas as pd
 import time
 from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt
 
-global count
-count = 0
-punch_dectected = False
 
 ax_window = []
 ay_window = []
@@ -14,6 +10,25 @@ gx_window = []
 gy_window = []
 gz_window = []
 window_mask = [ax_window, ay_window, az_window, gx_window, gy_window, gz_window]
+
+count = 0
+p_value = 0
+total_p_value = []
+total_p_value.append(0)
+
+class Punch:
+    def __init__(self) -> None:
+        self.is_punched = False
+
+    def setPunch(self, value: bool):
+        self.is_punched = value
+        return self.is_punched
+
+    def getPunch(self):
+        return self.is_punched
+
+
+punch = Punch()
 
 
 def importCnnModel():
@@ -31,20 +46,24 @@ def importCnnModel():
 
 
 def process_raw_data(queue):
+    global count, p_value
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
     # get 10 data 1st
     window_size = 10
-    time.sleep(1)
     # print("SLEEPT 500ms")
+    while len(queue[0]) == 0:
+        # print(queue[0])
+        print("Wait for 1s")
+        time.sleep(1)
+
     for _ in range(window_size):
         for j in range(6):
             window_mask[j].append(float(queue[j].pop(0)))
 
-    count = 0
     while 1:
+        global regresstion_model, classified_model, process_raw_data_flag
         if len(queue[0]) < 20:
-            global process_raw_data_flag
             # Cancel process
 
             # print("Length queue < 20 samples ---> Sleep for 10ms")
@@ -66,7 +85,6 @@ def process_raw_data(queue):
                 break
         else:
             # print(len(queue[0]))
-            global regresstion_model, classified_model
 
             # Import data to window
             for _ in range(window_size):
@@ -90,7 +108,7 @@ def process_raw_data(queue):
             lowest_acel is a aceleration value when no punch
             !!! WARNING: increase memory when put data in the model. DONT KNOW HOW TO FIX
             """
-
+            global punch
             lowest_acel = 10
             if regresstion_input["a_mean"][0] > lowest_acel:
                 for i in range(len(window_mask)):
@@ -102,19 +120,23 @@ def process_raw_data(queue):
                 [[np, p]] = classified_model.predict(X_test)
 
                 if p > np:
-                    count += 1
-                    print(count)
+                    # count += 1
+                    # print(count)
                     print(classified_input)
+                    # print(regresstion_input)
+                    count += 1
+                    [[p_value]] = regresstion_model.predict(regresstion_input)
+                    total_p_value.append(p_value)
+                    
+                    # # Import data to window
+                    # for _ in range(window_size):
+                    #     for j in range(6):
+                    #         window_mask[j].append(float(queue[j].pop(0)))
 
-                    # Import data to window
-                    for _ in range(window_size):
-                        for j in range(6):
-                            window_mask[j].append(float(queue[j].pop(0)))
-
-                    # POP 10
-                    for window_index in range(6):
-                        for _ in range(window_size):
-                            window_mask[window_index].pop(0)
+                    # # POP 10
+                    # for window_index in range(6):
+                    #     for _ in range(window_size):
+                    #         window_mask[window_index].pop(0)
 
             # POP 10
             for window_index in range(6):

@@ -5,17 +5,9 @@ import csv
 from ui.Ui_profile_options import Ui_ProfileSettings
 
 # import module
-from utils.user import User
-from utils.punching_bag import PunchingBag
+from database.User import User
+from database.PunchingBag import PunchingBag
 
-
-global user, bag
-
-user = User()
-user.getDataFromCSV()
-
-bag = PunchingBag()
-bag.getDataFromCSV()
 
 class ProfileOptionsDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -45,40 +37,41 @@ class ProfileOptionsDialog(QtWidgets.QDialog):
             self.imperial_system_radioBtn_checked
         )
 
-        # Accept
-        self.ui.buttonBox.accepted.connect(self.accepted)
+    def save_user_setting(self):
+        # User
+        user = dict()
+        user["name"] = self.ui.user_input_name.text()
+        user["age"] = self.ui.user_input_age.text()
+        user["height"] = self.ui.user_input_height.text()
+        user["weight"] = self.ui.user_input_weight.text()
+        user["metric"] = self.if_metric()
+        User().save_user_setting(user)
 
-    def accepted(self):
-        # Punching bag settings
-        if self.ui.hanging_bag_radio_button.isChecked():
-            bag.hanging_style = True
-        elif self.ui.freestanding_bag_radio_button.isChecked():
-            bag.hanging_style = False
+    def save_bag_setting(self):
+        # Punching bag
+        bag = dict()
+        bag["hanging_style"] = self.if_hanging_style()
+        bag["length"] = self.ui.punching_bag_input_length.text()
+        bag["l2btm"] = self.ui.punching_bag_input_btm2gnd.text()
+        bag["l2top"] = self.ui.punching_bag_input_height2top.text()
+        bag["weight"] = self.ui.punching_bag_input_weight.text()
+        PunchingBag().save_bag_setting(bag)
 
-        bag.length = float(self.ui.punching_bag_input_length.text())
-        bag.l2top = float(self.ui.punching_bag_input_height2top.text())
-        bag.l2btm = float(self.ui.punching_bag_input_btm2gnd.text())
-        bag.mass = float(self.ui.punching_bag_input_weight.text())
-
-        # User settings
+    def if_metric(self):
         if self.ui.metric_system_radioBtn.isChecked():
-            user.metric_sys = True
+            return 1
         elif self.ui.imperial_system_radioBtn.isChecked():
-            user.metric_sys = False
+            return 0
 
-        user.name = self.ui.user_input_name.text()
-        user.age = int(self.ui.user_input_age.text())
-        user.height = float(self.ui.user_input_height.text())
-        user.weight = float(self.ui.user_input_weight.text())
-
-        # Save all settings to each csv file.
-        user.saveSetting(user)
-        bag.saveSetting(bag)
-
+    def if_hanging_style(self):
+        if self.ui.hanging_bag_radio_button.isChecked():
+            return 1
+        elif self.ui.freestanding_bag_radio_button.isChecked():
+            return 0
 
     def imperial_system_radioBtn_checked(self):
         self.ui.imperial_system_radioBtn.setChecked(1)
-        
+
         # user
         self.ui.user_height_dimension.setText("ft")
         self.ui.user_weight_dimension.setText("lbs")

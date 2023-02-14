@@ -19,10 +19,11 @@ from utils.sensor import (
     stopGetData,
     queue,
 )
-from utils.CNN import importCnnModel, process_raw_data
+from utils.CNN import importCnnModel, process_raw_data, window_mask
 import utils.CNN
 
-from views.ProfileView import user, bag
+# database
+from database.PunchingBag import PunchingBag
 
 
 class AboutThisAppDialog(QtWidgets.QDialog):
@@ -38,7 +39,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
         # *
         # * Button callback
         # *
@@ -74,10 +74,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.force_plot = self.ui.force_chart.plot(self.force_buffer, pen="r")
 
         self.reset_plots()
-
         # update plots
-        self.plot_timer = QtCore.QTimer()
-        self.plot_timer.setInterval(100)
+        # self.plot_timer = QtCore.QTimer()
+        # self.plot_timer.setInterval(100)
 
         def timerEvent():
             self.accel_plot_ptr, self.accel_buffer = self.update_plot(
@@ -86,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.accel_plot_ptr,
                 self.accel_plot_xrange,
                 self.accel_buffer,
-                # read_data(),
+                window_mask[0],
             )
             self.force_plot_ptr, self.force_buffer = self.update_plot(
                 self.ui.force_chart,
@@ -94,10 +93,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.force_plot_ptr,
                 self.force_plot_xrange,
                 self.force_buffer,
-                # read_data(),
+                read_data(),
             )
 
-            # self.plot_timer.start()
+            self.plot_timer.start()
+
+        # self.plot_timer.timeout.connect(timerEvent)
+
+        self.update_punch_data_timer = QtCore.QTimer()
+        self.update_punch_data_timer.setInterval(1000)
+        self.update_punch_data_timer.timeout.connect(self.update_punches_view)
 
     def update_plot(self, chart, plot, plot_ptr, plot_xrange, buffer, data=[]):
         buffer = buffer + data
@@ -136,6 +141,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def start_button_pressed(self):
         # self.plot_timer.start()
+
+        self.update_punch_data_timer.start()
         try:
             getSensorData(utils.sensor.port, utils.sensor.baudrate)
             self.get_data_thread = threading.Thread(target=importRawData)
@@ -150,30 +157,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.process_raw_data_thread.start()
             print("Started process raw data thread")
 
-            # self.update_punches_view_thread = threading.Thread(
-            #     target=self.update_punches_view
-            # )
-            # self.update_punches_view_thread.start()
-            # print("Started update punches view thread")
-
             self.ui.start_button.setEnabled(False)
             self.ui.stop_button.setEnabled(True)
             self.ui.zero_button.setEnabled(False)
         except Exception as e:
             print(e)
-            # dlg_deviceNotFound("Device not Found!\nSetup device in Options")
+            dlg_deviceNotFound("Device not Found!\nSetup device in Options")
 
     def update_punches_view(self):
-        while 1:
-            if utils.CNN.punch_dectected:
-                number_of_punches += 1
-                self.ui.number_of_punches.setText(str(number_of_punches))
-                utils.CNN.punch_dectected = False
-            if utils.sensor.get_data_flag:
-                break
+
+        self.ui.number_of_punches.setText(str(utils.CNN.count))
+        self.ui.current_force_line.setText(str(utils.CNN.p_value))
+        self.ui.peak_force_line.setText(str(max(utils.CNN.total_p_value)))
 
     def stop_button_pressed(self):
         # self.plot_timer.stop()
+        self.update_punch_data_timer.stop()
         stopGetData()
         self.get_data_thread.join()
 
@@ -193,34 +192,56 @@ class MainWindow(QtWidgets.QMainWindow):
     def option_button_pressed(self, signal):
         # Load sensor option ui
         dlg = SensorOptionsDialog(self)
-        dlg.exec_()
+        if dlg.exec_():
+            pass
 
     def profileOptionsTriggered(self, signal):
         dlg = ProfileOptionsDialog(self)
-        # TODO: LOAD FROM DATABASE
+        # TODO: LOAD FROM DATABASE AUTH
+        (
+            _,
+            name,
+            age,
+            user_height,
+            user_weight,
+            user_metric,
+            _,
+            _,
+            hanging_style,
+            bag_weight,
+            bag_lenght,
+            bag_l2top,
+            bag_ltbtm,
+        ) = PunchingBag().get_user_bag("1")
 
-        # TODO: Load to ProfileVIew
-        if bag.hanging_style == "False":
+        # Load to ProfileVIew
+        # Radio BTN
+        if hanging_style == 0:
             ProfileOptionsDialog.freestanding_radioBtn_checked(dlg)
+        else:
+            ProfileOptionsDialog.hanging_radioBtn_checked(dlg)
 
-        if user.metric_sys == "False":
+        if user_metric == 0:
             ProfileOptionsDialog.imperial_system_radioBtn_checked(dlg)
+        else:
+            ProfileOptionsDialog.metric_system_radioBtn_checked(dlg)
 
         # Punching bag
-        dlg.ui.punching_bag_input_length.setText(str(bag.length))
-        dlg.ui.punching_bag_input_btm2gnd.setText(str(bag.l2btm))
-        dlg.ui.punching_bag_input_height2top.setText(str(bag.l2top))
-        dlg.ui.punching_bag_input_weight.setText(str(bag.mass))
+        dlg.ui.punching_bag_input_length.setText(str(bag_lenght))
+        dlg.ui.punching_bag_input_btm2gnd.setText(str(bag_ltbtm))
+        dlg.ui.punching_bag_input_height2top.setText(str(bag_l2top))
+        dlg.ui.punching_bag_input_weight.setText(str(bag_weight))
 
         # User
-        dlg.ui.user_input_name.setText(str(user.name))
-        dlg.ui.user_input_age.setText(str(user.age))
-        dlg.ui.user_input_height.setText(str(user.height))
-        dlg.ui.user_input_weight.setText(str(user.weight))
+        dlg.ui.user_input_name.setText(str(name))
+        dlg.ui.user_input_age.setText(str(age))
+        dlg.ui.user_input_height.setText(str(user_height))
+        dlg.ui.user_input_weight.setText(str(user_weight))
 
         if dlg.exec_():
-            # TODO: SAVE BACK TO DATABASE
-            print("Exit Profile Options")
+            # SAVE BACK TO DATABASE
+            dlg.save_user_setting()
+            dlg.save_bag_setting()
 
     def action_about_this_app_triggered(self, signal):
         dlg = AboutThisAppDialog(self)
