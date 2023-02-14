@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
 
-def deviceNotFound(msg:str):
+def dlg_deviceNotFound(msg:str):
     msgBox = QMessageBox()
     msgBox.setWindowTitle("Error")
     msgBox.setIcon(QMessageBox.Information)

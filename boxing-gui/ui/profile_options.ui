@@ -448,7 +448,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="measurement_system"/>
   <buttongroup name="punching_bag_style_button"/>
+  <buttongroup name="measurement_system"/>
  </buttongroups>
 </ui>

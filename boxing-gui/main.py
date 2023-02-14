@@ -9,7 +9,7 @@ from ui.Ui_about_this_app_dialog import Ui_AboutThisAppDialog
 # LoadView
 from views.SensorView import SensorOptionsDialog
 from views.ProfileView import ProfileOptionsDialog
-from views.ErrorView import deviceNotFound
+from views.ErrorView import dlg_deviceNotFound
 
 # import modules
 import utils.sensor
@@ -20,6 +20,7 @@ from utils.sensor import (
     queue,
 )
 from utils.CNN import importCnnModel, process_raw_data
+import utils.CNN
 
 from views.ProfileView import user, bag
 
@@ -139,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
             getSensorData(utils.sensor.port, utils.sensor.baudrate)
             self.get_data_thread = threading.Thread(target=importRawData)
             self.get_data_thread.start()
+            print("Started get data thread")
             """
             Make clean data before put into model to predict
             """
@@ -146,13 +148,29 @@ class MainWindow(QtWidgets.QMainWindow):
                 target=process_raw_data, args=(queue,)
             )
             self.process_raw_data_thread.start()
+            print("Started process raw data thread")
+
+            # self.update_punches_view_thread = threading.Thread(
+            #     target=self.update_punches_view
+            # )
+            # self.update_punches_view_thread.start()
+            # print("Started update punches view thread")
 
             self.ui.start_button.setEnabled(False)
             self.ui.stop_button.setEnabled(True)
             self.ui.zero_button.setEnabled(False)
-        except:
-            deviceNotFound("Device not Found!\nSetup device in Options")
-            
+        except Exception as e:
+            print(e)
+            # dlg_deviceNotFound("Device not Found!\nSetup device in Options")
+
+    def update_punches_view(self):
+        while 1:
+            if utils.CNN.punch_dectected:
+                number_of_punches += 1
+                self.ui.number_of_punches.setText(str(number_of_punches))
+                utils.CNN.punch_dectected = False
+            if utils.sensor.get_data_flag:
+                break
 
     def stop_button_pressed(self):
         # self.plot_timer.stop()
@@ -179,7 +197,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def profileOptionsTriggered(self, signal):
         dlg = ProfileOptionsDialog(self)
-        # Load to ProfileVIew
+        # TODO: LOAD FROM DATABASE
+
+        # TODO: Load to ProfileVIew
         if bag.hanging_style == "False":
             ProfileOptionsDialog.freestanding_radioBtn_checked(dlg)
 
@@ -198,7 +218,9 @@ class MainWindow(QtWidgets.QMainWindow):
         dlg.ui.user_input_height.setText(str(user.height))
         dlg.ui.user_input_weight.setText(str(user.weight))
 
-        dlg.exec_()
+        if dlg.exec_():
+            # TODO: SAVE BACK TO DATABASE
+            print("Exit Profile Options")
 
     def action_about_this_app_triggered(self, signal):
         dlg = AboutThisAppDialog(self)
@@ -221,5 +243,9 @@ if __name__ == "__main__":
     app_icon.addFile("boxing-gui/icons/logo.png", QtCore.QSize(64, 64))
     app.setWindowIcon(app_icon)
 
-    # TODO clost all port and shit before exit
-    sys.exit(app.exec_())
+    return_value = app.exec_()
+    if return_value == 0:
+        print("Exiting program...")
+        stopGetData()
+
+    sys.exit(return_value)

@@ -7,7 +7,7 @@ from utils.bluetooth import serial_ports
 import utils.sensor
 
 # Imports View
-from views.ErrorView import deviceNotFound
+from views.ErrorView import dlg_deviceNotFound
 
 class SensorOptionsDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -32,6 +32,8 @@ class SensorOptionsDialog(QtWidgets.QDialog):
     def submitClose(self):
         # pass data to MainWindow
         utils.sensor.baudrate = self.ui.baudrate.text()
+        print(f"{utils.sensor.port} is selected")
+        print(f"Baudrate {utils.sensor.baudrate} is selected")
         self.accept()
 
     def bluetoothScan(self):
@@ -39,10 +41,9 @@ class SensorOptionsDialog(QtWidgets.QDialog):
 
         list_ports = serial_ports()
         if len(list_ports) == 0:
-            deviceNotFound("Device NOT found!!!\nPlease connect to device via Bluetooth")
+            dlg_deviceNotFound("Device NOT found!!!\nPlease connect to device via Bluetooth")
             
         self.ui.list_bluetooth_ports.addItems(list_ports)
-
         self.ui.list_bluetooth_ports.itemClicked.connect(self.itemClicked_event)
 
     def itemDoubleClicked_event(self, item):

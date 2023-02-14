@@ -247,8 +247,8 @@
        </widget>
       </item>
       <item>
-       <widget class="PlotWidget" name="acceleration_chart">
-        <property name="backgroundBrush">
+       <widget class="PlotWidget" name="acceleration_chart" native="true">
+        <property name="backgroundBrush" stdset="0">
          <brush brushstyle="NoBrush">
           <color alpha="255">
            <red>255</red>
@@ -267,8 +267,8 @@
        </widget>
       </item>
       <item>
-       <widget class="PlotWidget" name="force_chart">
-        <property name="backgroundBrush">
+       <widget class="PlotWidget" name="force_chart" native="true">
+        <property name="backgroundBrush" stdset="0">
          <brush brushstyle="NoBrush">
           <color alpha="255">
            <red>255</red>
@@ -306,14 +306,20 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Current Force:</string>
+           <string>**Current Force:**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
           </property>
          </widget>
         </item>
         <item row="6" column="0">
          <widget class="QLabel" name="label_10">
           <property name="text">
-           <string>Punches / min:</string>
+           <string>**Punches / min:**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
           </property>
          </widget>
         </item>
@@ -326,7 +332,10 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Peak Force:</string>
+           <string>**Peak Force:**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
           </property>
          </widget>
         </item>
@@ -340,14 +349,20 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Average Force:</string>
+           <string>**Average Force:**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
           </property>
          </widget>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="label_14">
           <property name="text">
-           <string>Number of Punches:</string>
+           <string>**Number of Punches:**</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::MarkdownText</enum>
           </property>
          </widget>
         </item>
@@ -409,7 +424,10 @@
          </widget>
         </item>
         <item row="5" column="1">
-         <widget class="QLineEdit" name="number_of_punche_line">
+         <widget class="QLineEdit" name="number_of_punches">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -599,8 +617,9 @@
  <customwidgets>
   <customwidget>
    <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
+   <extends>QWidget</extends>
    <header>pyqtgraph</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

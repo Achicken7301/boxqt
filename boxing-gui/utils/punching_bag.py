@@ -38,11 +38,11 @@ class PunchingBag:
             self.l2top = float(bag_info.get("l2top"))
             self.l2btm = float(bag_info.get("l2btm"))
             self.mass = float(bag_info.get("mass"))
-            
+
     @staticmethod
     def saveSetting(bagInfos):
         bag_infos = bagInfos.__dict__
-        with open('boxing-gui/database/punching_bag.csv', 'w', newline='') as f:
+        with open("boxing-gui/database/punching_bag.csv", "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=bag_infos.keys())
             writer.writeheader()
             writer.writerow(bag_infos)

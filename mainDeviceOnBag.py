@@ -9,8 +9,8 @@ import pyqtgraph as pg
 import os
 import shutil
 
-class MainWindow(QtWidgets.QMainWindow):
 
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.port = "COM6"
@@ -31,18 +31,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recordDataTimer = QtCore.QTimer()
         self.recordDataTimer.timeout.connect(lambda: self.recordData())
 
+        # Dir path
+        self.filePath = "D:/laragon\www/boxqt\data/"
+        self.dir.setText(self.filePath)
+
     def moveFileBtn(self):
-        toDirectory = 'D:\laragon\www\\boxqt\data\\08.01.22\\'
-        shutil.move(self.filePath, toDirectory)
-    
+        self.toDirectory = self.dir.text()
+        self.dir.setText(self.toDirectory)
+        shutil.move(self.filename, self.toDirectory)
+        self.status.setText(f"Moved file {self.filename} to {self.toDirectory} successfully")
+        print(f"Moved file {self.filename} to {self.toDirectory} successfully")
+
     def deleteBtn(self):
-        os.remove(self.filePath)
-        
+        os.remove(self.filename)
+        self.status.setText(f"Deleted file {self.filename} succesfully")
+        print(f"Deleted file {self.filename} succesfully")
+
     def clearList(self):
         print("clear list")
         self.portOnHand.clear()
 
     def startRecord(self):
+        self.status.clear()
         if self.is_record == True:
             print("Already Recording")
         else:
@@ -55,19 +65,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.sample_rate.setText("Recording")
             print("Start Recording")
-            
+
             self.startRecordBtn.setEnabled(False)
             self.stopRecordBtn.setEnabled(True)
-            
+
             # TimerRun
             self.recordDataTimer.start()  # Interupt every 1ms = 1000Hz
 
     def stopRecord(self):
         if self.is_record == True:
-            
+
             self.startRecordBtn.setEnabled(True)
             self.stopRecordBtn.setEnabled(False)
-            
+
             self.is_record = False
             self.ser.close()
             self.recordDataTimer.stop()
@@ -75,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Stop Recording")
             # Empty data before record a new one
             self.export2csv()
-            
+
             self.data = []
         else:
             print("Haven't record anything yet")
@@ -92,12 +102,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def export2csv(self):
         # filename: dd-mm-YYYY hh:mm:ss
-        name_format = datetime.datetime.now().strftime("%x %X").replace(
-            "/", "-")
+        name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
         name_format = name_format.replace(":", "-")
         self.filename = name_format + ".csv"
         self.filename = "AcelGyro " + self.filename
-        self.filePath = 'D:\laragon\www\\boxqt\\' + self.filename
         # clean data
         ax_buffer = []
         ay_buffer = []
@@ -117,21 +125,18 @@ class MainWindow(QtWidgets.QMainWindow):
             except Exception as e:
                 print(e)
 
-
         # plot data: x, y values
         self.my_widget.clear()
         self.my_widget.plot(range(0, len(ax_buffer)), ax_buffer)
         self.my_widget.plot(range(0, len(ax_buffer)), ay_buffer)
         self.my_widget.plot(range(0, len(ax_buffer)), az_buffer)
 
-
-        df = pd.DataFrame(list(
-            zip(ax_buffer, ay_buffer, az_buffer, gx_buffer, gy_buffer,
-                gz_buffer)),
-                          columns=['ax', 'ay', 'az', 'gx', 'gy', 'gz'])
-
+        df = pd.DataFrame(
+            list(zip(ax_buffer, ay_buffer, az_buffer, gx_buffer, gy_buffer, gz_buffer)),
+            columns=["ax", "ay", "az", "gx", "gy", "gz"],
+        )
+        # print(self.filePath + self.filename)
         df.to_csv(self.filename)
-        
 
     def portScan(self):
         print("Start scaning")
@@ -157,7 +162,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if "BTHENUM" in p.hwid:
                 start_of_address = p.hwid.rfind("&")
                 end_of_address = p.hwid.rfind("_")
-                address = p.hwid[start_of_address + 1:end_of_address]
+                address = p.hwid[start_of_address + 1 : end_of_address]
                 if int(address, 16) == 0:
                     port_type = "incoming"
                 else:

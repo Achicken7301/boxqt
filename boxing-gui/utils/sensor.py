@@ -43,6 +43,8 @@ def getSensorData(port: str, baudrate: int = 115200):
 def importRawData():
     global acel_gyro_ser, get_data_flag
     while 1:
+        if get_data_flag:
+            break
         try:
             # print("Still getting data...")
             b = acel_gyro_ser.readline()
@@ -50,8 +52,8 @@ def importRawData():
             # Store data to window
             ax_ser, ay_ser, az_ser, gx_ser, gy_ser, gz_ser = data_ser[0].split(",")
             queue[0].append(ax_ser)
-            queue[1].append(az_ser)
-            queue[2].append(ay_ser)
+            queue[1].append(ay_ser)
+            queue[2].append(az_ser)
             queue[3].append(gx_ser)
             queue[4].append(gy_ser)
             queue[5].append(gz_ser)

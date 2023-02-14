@@ -1,10 +1,11 @@
 import pandas as pd
 import time
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
 global count
 count = 0
-
-input = pd.DataFrame()
+punch_dectected = False
 
 ax_window = []
 ay_window = []
@@ -18,40 +19,64 @@ window_mask = [ax_window, ay_window, az_window, gx_window, gy_window, gz_window]
 def importCnnModel():
     import tensorflow as tf
 
-    global reloaded_model
+    global classified_model, regresstion_model
     #  TODO SPEED THINGS UP
     # https://stackoverflow.com/questions/65298241/what-does-this-tensorflow-message-mean-any-side-effect-was-the-installation-su#:~:text=which%20can%20speed%20things%20up
-    reloaded_model = tf.keras.models.load_model("D:/laragon/www/boxqt/CNN/model")
+    classified_model = tf.keras.models.load_model(
+        "D:\laragon\www/boxqt\CNN\classified_model"
+    )
+    regresstion_model = tf.keras.models.load_model(
+        "D:\laragon\www/boxqt\CNN/regression_model"
+    )
 
 
 def process_raw_data(queue):
+    regresstion_input = pd.DataFrame()
+    classified_input = pd.DataFrame()
     # get 10 data 1st
-    time.sleep(0.5)
-    for _ in range(10):
+    window_size = 10
+    time.sleep(1)
+    # print("SLEEPT 500ms")
+    for _ in range(window_size):
         for j in range(6):
             window_mask[j].append(float(queue[j].pop(0)))
 
+    count = 0
     while 1:
         if len(queue[0]) < 20:
             global process_raw_data_flag
             # Cancel process
-            if process_raw_data_flag:
-                break
 
             # print("Length queue < 20 samples ---> Sleep for 10ms")
             time.sleep(0.01)
+
+            # POP EVERY DATA IN QUEUE
+            if process_raw_data_flag:
+
+                # REMOVE EVERYTHING IN QUEUE
+                while len(queue[0]) != 0:
+                    for i in range(len(queue)):
+                        queue[i].pop(0)
+
+                # REMOVE EVERYTHING IN WINDOW_MASK
+                while len(window_mask[0]) != 0:
+                    for i in range(len(window_mask)):
+                        window_mask[i].pop(0)
+
+                break
         else:
-            global reloaded_model
+            # print(len(queue[0]))
+            global regresstion_model, classified_model
 
             # Import data to window
-            for _ in range(10):
+            for _ in range(window_size):
                 for j in range(6):
                     window_mask[j].append(float(queue[j].pop(0)))
-            """
-            process data time cost: 8ms
-            """
+            # """
+            # process data time cost: 8ms
+            # """
             process_window_data(
-                input,
+                regresstion_input,
                 window_mask[0],
                 window_mask[1],
                 window_mask[2],
@@ -63,15 +88,37 @@ def process_raw_data(queue):
             import data to window CNN and output force
             with condition a_mean TODO may change the condition for better performance
             lowest_acel is a aceleration value when no punch
-            WARNING: increase memory when put data in the model.
+            !!! WARNING: increase memory when put data in the model. DONT KNOW HOW TO FIX
             """
-            lowest_acel = 10
-            if input["a_mean"][0] > lowest_acel:
-                force = reloaded_model.predict(input)
-                print("Force predict: " + str(force[0]))
 
+            lowest_acel = 10
+            if regresstion_input["a_mean"][0] > lowest_acel:
+                for i in range(len(window_mask)):
+                    classified_input[i] = window_mask[i]
+
+                X_scaled = StandardScaler().fit_transform(classified_input)
+                X_test = X_scaled.reshape(1, 20, 6, 1)
+
+                [[np, p]] = classified_model.predict(X_test)
+
+                if p > np:
+                    count += 1
+                    print(count)
+                    print(classified_input)
+
+                    # Import data to window
+                    for _ in range(window_size):
+                        for j in range(6):
+                            window_mask[j].append(float(queue[j].pop(0)))
+
+                    # POP 10
+                    for window_index in range(6):
+                        for _ in range(window_size):
+                            window_mask[window_index].pop(0)
+
+            # POP 10
             for window_index in range(6):
-                for _ in range(10):
+                for _ in range(window_size):
                     window_mask[window_index].pop(0)
 
 
