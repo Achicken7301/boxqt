@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 from sklearn.preprocessing import StandardScaler
-
+import threading
 
 ax_window = []
 ay_window = []
@@ -15,6 +15,7 @@ count = 0
 p_value = 0
 total_p_value = []
 total_p_value.append(0)
+
 
 class Punch:
     def __init__(self) -> None:
@@ -46,7 +47,8 @@ def importCnnModel():
 
 
 def process_raw_data(queue):
-    global count, p_value
+    global count, p_value, acceleration_data_for_view
+    acceleration_data_for_view = pd.DataFrame()
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
     # get 10 data 1st
@@ -56,10 +58,14 @@ def process_raw_data(queue):
         # print(queue[0])
         print("Wait for 1s")
         time.sleep(1)
-
-    for _ in range(window_size):
-        for j in range(6):
-            window_mask[j].append(float(queue[j].pop(0)))
+    try:
+        for _ in range(window_size):
+            for j in range(6):
+                window_mask[j].append(float(queue[j].pop(0)))
+    except Exception as e:
+        print(e)
+        for i in range(len(queue)):
+            print(f"Length queue[{i}]: {len(queue[i])}")
 
     while 1:
         global regresstion_model, classified_model, process_raw_data_flag
@@ -117,26 +123,20 @@ def process_raw_data(queue):
                 X_scaled = StandardScaler().fit_transform(classified_input)
                 X_test = X_scaled.reshape(1, 20, 6, 1)
 
+                """
+                np: no punch
+                p: punch
+                """
                 [[np, p]] = classified_model.predict(X_test)
 
                 if p > np:
-                    # count += 1
-                    # print(count)
-                    print(classified_input)
-                    # print(regresstion_input)
+                    # print(classified_input)
+                    acceleration_data_for_view = classified_input
+                    print(acceleration_data_for_view)
                     count += 1
+                    # print(f"count {count}: {acceleration_data_for_view}")
                     [[p_value]] = regresstion_model.predict(regresstion_input)
                     total_p_value.append(p_value)
-                    
-                    # # Import data to window
-                    # for _ in range(window_size):
-                    #     for j in range(6):
-                    #         window_mask[j].append(float(queue[j].pop(0)))
-
-                    # # POP 10
-                    # for window_index in range(6):
-                    #     for _ in range(window_size):
-                    #         window_mask[window_index].pop(0)
 
             # POP 10
             for window_index in range(6):

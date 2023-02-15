@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
-    <height>477</height>
+    <width>943</width>
+    <height>542</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -248,26 +248,12 @@
       </item>
       <item>
        <widget class="PlotWidget" name="acceleration_chart" native="true">
-        <property name="backgroundBrush" stdset="0">
-         <brush brushstyle="NoBrush">
-          <color alpha="255">
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Force</string>
+        <property name="autoFillBackground">
+         <bool>true</bool>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="PlotWidget" name="force_chart" native="true">
         <property name="backgroundBrush" stdset="0">
          <brush brushstyle="NoBrush">
           <color alpha="255">
@@ -577,7 +563,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>825</width>
+     <width>943</width>
      <height>26</height>
     </rect>
    </property>

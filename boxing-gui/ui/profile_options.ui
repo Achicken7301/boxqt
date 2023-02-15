@@ -49,6 +49,9 @@
        <property name="text">
         <string>0.0</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
@@ -80,6 +83,9 @@
        <property name="text">
         <string>0.0</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="4" column="2">
@@ -93,6 +99,9 @@
       <widget class="QLineEdit" name="punching_bag_input_btm2gnd">
        <property name="text">
         <string>0.0</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -137,6 +146,9 @@
       <widget class="QLineEdit" name="punching_bag_input_length">
        <property name="text">
         <string>0.0</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -248,6 +260,9 @@
        <property name="text">
         <string>0</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="5" column="0">
@@ -269,12 +284,18 @@
        <property name="text">
         <string>0.0</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="user_input_name">
        <property name="text">
         <string>fullname</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -299,6 +320,9 @@
       <widget class="QLineEdit" name="user_input_height">
        <property name="text">
         <string>0.0</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -448,7 +472,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="punching_bag_style_button"/>
   <buttongroup name="measurement_system"/>
+  <buttongroup name="punching_bag_style_button"/>
  </buttongroups>
 </ui>
