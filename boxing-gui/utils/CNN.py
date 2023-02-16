@@ -47,8 +47,9 @@ def importCnnModel():
 
 
 def process_raw_data(queue):
-    global count, p_value, acceleration_data_for_view
+    global count, p_value, acceleration_data_for_view, df1
     acceleration_data_for_view = pd.DataFrame()
+    df1 = pd.DataFrame()
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
     # get 10 data 1st
@@ -133,6 +134,9 @@ def process_raw_data(queue):
                     # print(classified_input)
                     acceleration_data_for_view = classified_input
                     print(acceleration_data_for_view)
+                    df1 = pd.concat(
+                        [df1, acceleration_data_for_view], ignore_index=True
+                    )
                     count += 1
                     # print(f"count {count}: {acceleration_data_for_view}")
                     [[p_value]] = regresstion_model.predict(regresstion_input)

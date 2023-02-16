@@ -1,4 +1,5 @@
 # import modules
+import datetime
 
 import utils.CNN
 import serial
@@ -36,6 +37,14 @@ def stopGetData():
     utils.CNN.p_value = 0
     utils.CNN.total_p_value = []
     utils.CNN.total_p_value.append(0)
+    
+    
+    # filename: dd-mm-YYYY hh:mm:ss
+    name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
+    name_format = name_format.replace(":", "-")
+    filename = name_format + ".xlsx"
+    filename = "yes_no_punches " + filename
+    utils.CNN.df1.to_excel(filename, index=False)
 
 
 def getSensorData(port: str, baudrate: int = 115200):

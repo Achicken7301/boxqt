@@ -87,7 +87,6 @@ class MainWindow(QtWidgets.QMainWindow):
             dlg_deviceNotFound("Device not Found!\nSetup device in Options")
 
     def update_punches_view(self):
-
         self.ui.number_of_punches.setText(str(utils.CNN.count))
         self.ui.current_force_line.setText(str(utils.CNN.p_value))
         self.ui.peak_force_line.setText(str(max(utils.CNN.total_p_value)))
@@ -114,6 +113,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 pen={"color": "b", "width": 3},
                 name="az",
             )
+            # reset dataframe to empty
             utils.CNN.acceleration_data_for_view = pd.DataFrame()
 
     def stop_button_pressed(self):
