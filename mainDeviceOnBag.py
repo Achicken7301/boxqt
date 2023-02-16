@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.recordDataTimer.timeout.connect(lambda: self.recordData())
 
         # Dir path
-        self.filePath = "D:/laragon\www/boxqt\data/"
+        self.filePath = "data/"
         self.dir.setText(self.filePath)
 
     def moveFileBtn(self):
