@@ -282,6 +282,9 @@
       </item>
       <item row="3" column="0">
        <widget class="QLineEdit" name="save_folder_line">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -580,13 +583,6 @@
     <addaction name="actionNew"/>
     <addaction name="profile_options"/>
    </widget>
-   <widget class="QMenu" name="menuFiles">
-    <property name="title">
-     <string>Files</string>
-    </property>
-    <addaction name="actionSwitch_Profies"/>
-   </widget>
-   <addaction name="menuFiles"/>
    <addaction name="menuProfile"/>
    <addaction name="menuHelp"/>
   </widget>

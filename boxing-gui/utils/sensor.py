@@ -1,8 +1,12 @@
 # import modules
 import datetime
-
 import utils.CNN
 import serial
+import queue as q
+
+q_ax = q.Queue(maxsize=3000)
+q_ay = q.Queue(maxsize=3000)
+q_az = q.Queue(maxsize=3000)
 
 global acel_gyro_ser, get_data_flag, queue
 get_data_flag = False
@@ -22,7 +26,7 @@ def closeSer():
 
 
 def stopGetData():
-    global acel_gyro_ser, get_data_flag, process_raw_data_flag
+    global acel_gyro_ser, get_data_flag, process_raw_data_flag, q_ax, q_ay, q_az
 
     acel_gyro_ser.close()
 
@@ -30,15 +34,16 @@ def stopGetData():
     get_data_flag = True
     utils.CNN.process_raw_data_flag = True
 
-    # Save to database
-
     # reset every variables
     utils.CNN.count = 0
     utils.CNN.p_value = 0
     utils.CNN.total_p_value = []
     utils.CNN.total_p_value.append(0)
     
-    
+    q_ax.queue.clear()
+    q_ay.queue.clear()
+    q_az.queue.clear()
+
     # filename: dd-mm-YYYY hh:mm:ss
     name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
     name_format = name_format.replace(":", "-")
@@ -58,7 +63,7 @@ def getSensorData(port: str, baudrate: int = 115200):
 
 
 def importRawData():
-    global acel_gyro_ser, get_data_flag
+    global acel_gyro_ser, get_data_flag, data_plot_buffer
     print("Start importRawData")
     while 1:
         if get_data_flag:
@@ -75,6 +80,17 @@ def importRawData():
             queue[3].append(gx_ser)
             queue[4].append(gy_ser)
             queue[5].append(gz_ser)
+
+            # store to queue for display
+            if not q_ax.full():
+                q_ax.put(float(ax_ser))
+                q_ay.put(float(ay_ser))
+                q_az.put(float(az_ser))
+            else:
+                q_ax.get()
+                q_ay.get()
+                q_az.get()
+
         except Exception as e:
-            print(e)
-            break
+            print(f"ERROR WHEN IMPORT DATA:\n{e}")
+            # break

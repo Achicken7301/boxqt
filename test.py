@@ -1,20 +1,16 @@
-import mysql.connector
+import queue
 
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="yourusername",
-  password="yourpassword",
-  database="mydatabase"
-)
+q_ax = queue.Queue(maxsize=5)
+q_ax.put(float(1.12))
+q_ax.put(float(1.12))
+q_ax.put(float(1.12))
+q_ax.put(float(1.12))
+q_ax.put(float(1.12))
 
-mycursor = mydb.cursor()
 
-sql = "SELECT * FROM users WHERE name = %s"
-adr = ("khang", )
 
-mycursor.execute(sql, adr)
 
-myresult = mycursor.fetchall()
-
-for x in myresult:
-  print(x)
+print(q_ax.full())
+print(list(q_ax.queue))
+print(range(0, len(list(q_ax.queue))))
+print(q_ax.full())

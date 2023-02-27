@@ -1,6 +1,8 @@
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QThread
 import threading
 import pandas as pd
+import numpy as np
 
 # Load UI
 from ui.Ui_main_window import Ui_MainWindow
@@ -8,7 +10,7 @@ from ui.Ui_main_window import Ui_MainWindow
 # LoadView
 from views.SensorView import SensorOptionsDialog
 from views.ProfileView import ProfileOptionsDialog
-from views.ErrorView import dlg_deviceNotFound
+from views.ErrorView import ErrorView
 from views.About import AboutThisAppDialog
 
 # import modules
@@ -18,6 +20,9 @@ from utils.sensor import (
     importRawData,
     stopGetData,
     queue,
+    q_ax,
+    q_ay,
+    q_az,
 )
 from utils.CNN import importCnnModel, process_raw_data, window_mask
 import utils.CNN
@@ -59,12 +64,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.acceleration_chart.addLegend()
 
         self.update_punch_data_timer = QtCore.QTimer()
-        self.update_punch_data_timer.setInterval(100)
+        self.update_punch_data_timer.setInterval(1000)
         self.update_punch_data_timer.timeout.connect(self.update_punches_view)
 
     def start_button_pressed(self):
+        # clear plot chart
+        self.ui.acceleration_chart.clear()
+
+        # Wait for import model to finish
+        self.load_model_thread.join()
 
         self.update_punch_data_timer.start()
+
         try:
             getSensorData(utils.sensor.port, utils.sensor.baudrate)
             self.get_data_thread = threading.Thread(target=importRawData)
@@ -84,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.zero_button.setEnabled(False)
         except Exception as e:
             print(e)
-            dlg_deviceNotFound("Device not Found!\nSetup device in Options")
+            ErrorView().dlg_deviceNotFound("Device not Found!\nSetup device in Options")
 
     def update_punches_view(self):
         self.ui.number_of_punches.setText(str(utils.CNN.count))
@@ -92,39 +103,42 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.peak_force_line.setText(str(max(utils.CNN.total_p_value)))
 
         # Plot Acel
-        if not utils.CNN.acceleration_data_for_view.empty:
-            self.ui.acceleration_chart.clear()
-            # update 3 valie ax, ay, az
-            self.ui.acceleration_chart.plot(
-                utils.CNN.acceleration_data_for_view.index,
-                utils.CNN.acceleration_data_for_view[0],
-                pen={"color": "r", "width": 3},
-                name="ax",
-            )
-            self.ui.acceleration_chart.plot(
-                utils.CNN.acceleration_data_for_view.index,
-                utils.CNN.acceleration_data_for_view[1],
-                pen={"color": "g", "width": 3},
-                name="ay",
-            )
-            self.ui.acceleration_chart.plot(
-                utils.CNN.acceleration_data_for_view.index,
-                utils.CNN.acceleration_data_for_view[2],
-                pen={"color": "b", "width": 3},
-                name="az",
-            )
-            # reset dataframe to empty
-            utils.CNN.acceleration_data_for_view = pd.DataFrame()
+        self.ui.acceleration_chart.clear()
+
+        # update 3 valie ax, ay, az
+        self.ui.acceleration_chart.plot(
+            range(0, len(list(q_ax.queue))),
+            list(q_ax.queue),
+            pen={"color": "r", "width": 1},
+            name="ax",
+        )
+
+        self.ui.acceleration_chart.plot(
+            range(0, len(list(q_ay.queue))),
+            list(q_ay.queue),
+            pen={"color": "g", "width": 1},
+            name="ay",
+        )
+
+        self.ui.acceleration_chart.plot(
+            range(0, len(list(q_az.queue))),
+            list(q_az.queue),
+            pen={"color": "b", "width": 1},
+            name="az",
+        )
 
     def stop_button_pressed(self):
-        # self.plot_timer.stop()
-        self.update_punch_data_timer.stop()
+        # Cancel all threads
         stopGetData()
-        self.get_data_thread.join()
+        # stop timer update main view
+        self.update_punch_data_timer.stop()
 
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
         self.ui.zero_button.setEnabled(True)
+
+        # Wait for using all data in queue
+        self.get_data_thread.join()
 
     def zero_button_pressed(self):
         self.reset_plots()

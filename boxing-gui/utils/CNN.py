@@ -1,7 +1,9 @@
 import pandas as pd
 import time
 from sklearn.preprocessing import StandardScaler
-import threading
+
+# import models
+from models.PunchModel import Punch
 
 ax_window = []
 ay_window = []
@@ -15,18 +17,6 @@ count = 0
 p_value = 0
 total_p_value = []
 total_p_value.append(0)
-
-
-class Punch:
-    def __init__(self) -> None:
-        self.is_punched = False
-
-    def setPunch(self, value: bool):
-        self.is_punched = value
-        return self.is_punched
-
-    def getPunch(self):
-        return self.is_punched
 
 
 punch = Punch()
@@ -59,24 +49,15 @@ def process_raw_data(queue):
         # print(queue[0])
         print("Wait for 1s")
         time.sleep(1)
-    try:
-        for _ in range(window_size):
-            for j in range(6):
-                window_mask[j].append(float(queue[j].pop(0)))
-    except Exception as e:
-        print(e)
-        for i in range(len(queue)):
-            print(f"Length queue[{i}]: {len(queue[i])}")
-
+    
+    queue_push(queue, window_size)
     while 1:
         global regresstion_model, classified_model, process_raw_data_flag
         if len(queue[0]) < 20:
-            # Cancel process
-
-            # print("Length queue < 20 samples ---> Sleep for 10ms")
+            # Wait for data fill in queue
             time.sleep(0.01)
 
-            # POP EVERY DATA IN QUEUE
+            # POP EVERY DATA IN QUEUE BEFORE CLOSE THREAD
             if process_raw_data_flag:
 
                 # REMOVE EVERYTHING IN QUEUE
@@ -94,12 +75,11 @@ def process_raw_data(queue):
             # print(len(queue[0]))
 
             # Import data to window
-            for _ in range(window_size):
-                for j in range(6):
-                    window_mask[j].append(float(queue[j].pop(0)))
-            # """
-            # process data time cost: 8ms
-            # """
+            queue_push(queue, window_size)
+            
+            """
+            process data time cost: 8ms
+            """
             process_window_data(
                 regresstion_input,
                 window_mask[0],
@@ -132,10 +112,8 @@ def process_raw_data(queue):
 
                 if p > np:
                     # print(classified_input)
-                    acceleration_data_for_view = classified_input
-                    print(acceleration_data_for_view)
                     df1 = pd.concat(
-                        [df1, acceleration_data_for_view], ignore_index=True
+                        [df1, classified_input], ignore_index=True
                     )
                     count += 1
                     # print(f"count {count}: {acceleration_data_for_view}")
@@ -146,6 +124,11 @@ def process_raw_data(queue):
             for window_index in range(6):
                 for _ in range(window_size):
                     window_mask[window_index].pop(0)
+
+def queue_push(queue, window_size):
+    for _ in range(window_size):
+        for j in range(6):
+            window_mask[j].append(float(queue[j].pop(0)))
 
 
 def process_window_data(

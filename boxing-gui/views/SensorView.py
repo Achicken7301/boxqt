@@ -7,7 +7,7 @@ from utils.bluetooth import serial_ports
 import utils.sensor
 
 # Imports View
-from views.ErrorView import dlg_deviceNotFound
+from views.ErrorView import ErrorView
 
 class SensorOptionsDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -41,7 +41,7 @@ class SensorOptionsDialog(QtWidgets.QDialog):
 
         list_ports = serial_ports()
         if len(list_ports) == 0:
-            dlg_deviceNotFound("Device NOT found!!!\nPlease connect to device via Bluetooth")
+            ErrorView().dlg_deviceNotFound("Device NOT found!!!\nPlease connect to device via Bluetooth")
             
         self.ui.list_bluetooth_ports.addItems(list_ports)
         self.ui.list_bluetooth_ports.itemClicked.connect(self.itemClicked_event)
