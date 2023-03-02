@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
 import threading
-import pandas as pd
-import numpy as np
+import datetime
 
 # Load UI
 from ui.Ui_main_window import Ui_MainWindow
@@ -67,6 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_punch_data_timer.setInterval(1000)
         self.update_punch_data_timer.timeout.connect(self.update_punches_view)
 
+        # UI
+        self.ui.save_folder_line.setText("boxing-gui/Profies/User/")
+
     def start_button_pressed(self):
         # clear plot chart
         self.ui.acceleration_chart.clear()
@@ -78,12 +80,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         try:
             getSensorData(utils.sensor.port, utils.sensor.baudrate)
+
+            # store sensor's data to queue
             self.get_data_thread = threading.Thread(target=importRawData)
             self.get_data_thread.start()
             print("Started get data thread")
-            """
-            Make clean data before put into model to predict
-            """
+
+            # Get data from queue to process
             self.process_raw_data_thread = threading.Thread(
                 target=process_raw_data, args=(queue,)
             )
@@ -139,6 +142,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Wait for using all data in queue
         self.get_data_thread.join()
+
+        if self.ui.log_check.isChecked():
+            path = self.ui.save_folder_line.text()
+            # filename: dd-mm-YYYY hh:mm:ss
+            name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
+            name_format = name_format.replace(":", "-")
+            filename = name_format + ".xlsx"
+            filename = "yes_no_punches " + filename
+            print(f"save file to {filename}")
+            utils.CNN.df1.to_excel(path + filename, index=False)
 
     def zero_button_pressed(self):
         self.reset_plots()

@@ -1,12 +1,13 @@
 # import modules
-import datetime
 import utils.CNN
 import serial
 import queue as q
 
-q_ax = q.Queue(maxsize=3000)
-q_ay = q.Queue(maxsize=3000)
-q_az = q.Queue(maxsize=3000)
+queue_max_size = 1000
+
+q_ax = q.Queue(maxsize=queue_max_size)
+q_ay = q.Queue(maxsize=queue_max_size)
+q_az = q.Queue(maxsize=queue_max_size)
 
 global acel_gyro_ser, get_data_flag, queue
 get_data_flag = False
@@ -39,17 +40,10 @@ def stopGetData():
     utils.CNN.p_value = 0
     utils.CNN.total_p_value = []
     utils.CNN.total_p_value.append(0)
-    
+
     q_ax.queue.clear()
     q_ay.queue.clear()
     q_az.queue.clear()
-
-    # filename: dd-mm-YYYY hh:mm:ss
-    name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
-    name_format = name_format.replace(":", "-")
-    filename = name_format + ".xlsx"
-    filename = "yes_no_punches " + filename
-    utils.CNN.df1.to_excel(filename, index=False)
 
 
 def getSensorData(port: str, baudrate: int = 115200):
@@ -68,18 +62,22 @@ def importRawData():
     while 1:
         if get_data_flag:
             break
+
+        # print("Still getting data...")
         try:
-            # print("Still getting data...")
             b = acel_gyro_ser.readline()
             data_ser = b.decode().splitlines()
             # Store data to window
+            """Better queue
+            https://stackoverflow.com/questions/20631813/python-fifo-2-dimensional#:~:text=Using%20Queue%20module%20which%20allows%20multi%2Dthread%20use.%20Note%20that%20in%20python%203%20Queue%20has%20been%20renamed%20to%20queue.
+            """
             ax_ser, ay_ser, az_ser, gx_ser, gy_ser, gz_ser = data_ser[0].split(",")
-            queue[0].append(ax_ser)
-            queue[1].append(ay_ser)
-            queue[2].append(az_ser)
-            queue[3].append(gx_ser)
-            queue[4].append(gy_ser)
-            queue[5].append(gz_ser)
+            queue[0].append(float(ax_ser))
+            queue[1].append(float(ay_ser))
+            queue[2].append(float(az_ser))
+            queue[3].append(float(gx_ser))
+            queue[4].append(float(gy_ser))
+            queue[5].append(float(gz_ser))
 
             # store to queue for display
             if not q_ax.full():
@@ -92,5 +90,5 @@ def importRawData():
                 q_az.get()
 
         except Exception as e:
-            print(f"ERROR WHEN IMPORT DATA:\n{e}")
+            print(f"ERROR WHEN IMPORT DATA:\n{e}\n{data_ser[0].split(',')}")
             # break

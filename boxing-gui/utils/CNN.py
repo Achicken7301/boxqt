@@ -37,22 +37,23 @@ def importCnnModel():
 
 
 def process_raw_data(queue):
-    global count, p_value, acceleration_data_for_view, df1
+    global count, p_value, acceleration_data_for_view, df1, regresstion_model, classified_model, process_raw_data_flag
     acceleration_data_for_view = pd.DataFrame()
     df1 = pd.DataFrame()
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
     # get 10 data 1st
-    window_size = 10
+    window_size = 5
     # print("SLEEPT 500ms")
     while len(queue[0]) == 0:
         # print(queue[0])
         print("Wait for 1s")
         time.sleep(1)
-    
-    queue_push(queue, window_size)
+        if process_raw_data_flag:
+            break
+
+    queue_push(queue, 20 - window_size)
     while 1:
-        global regresstion_model, classified_model, process_raw_data_flag
         if len(queue[0]) < 20:
             # Wait for data fill in queue
             time.sleep(0.01)
@@ -76,10 +77,8 @@ def process_raw_data(queue):
 
             # Import data to window
             queue_push(queue, window_size)
-            
-            """
-            process data time cost: 8ms
-            """
+
+            # process data time cost: 8ms
             process_window_data(
                 regresstion_input,
                 window_mask[0],
@@ -110,20 +109,28 @@ def process_raw_data(queue):
                 """
                 [[np, p]] = classified_model.predict(X_test)
 
+                print(classified_input)
                 if p > np:
-                    # print(classified_input)
-                    df1 = pd.concat(
-                        [df1, classified_input], ignore_index=True
-                    )
+                    print("DECTECTED")
+                    df1 = pd.concat([df1, classified_input], ignore_index=True)
                     count += 1
                     # print(f"count {count}: {acceleration_data_for_view}")
                     [[p_value]] = regresstion_model.predict(regresstion_input)
                     total_p_value.append(p_value)
 
+                    # remove next data
+
+                    queue_push(queue, window_size)
+                    # POP 10
+                    for window_index in range(6):
+                        for _ in range(window_size):
+                            window_mask[window_index].pop(0)
+
             # POP 10
             for window_index in range(6):
                 for _ in range(window_size):
                     window_mask[window_index].pop(0)
+
 
 def queue_push(queue, window_size):
     for _ in range(window_size):
