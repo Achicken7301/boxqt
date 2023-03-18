@@ -29,9 +29,9 @@ BluetoothSerial SerialBT;
 int timer_counter = 0;
 int timer_flag = 0;
 int led_state = 0;
-int sampleRate = 10000; // 1000Hz
+int sampleRate = 1000; // 1000Hz
 
-#define CLOCK_TICK 0.1 //1ms
+#define CLOCK_TICK 1 //1ms
 
 hw_timer_t * timer = NULL;
 
@@ -60,7 +60,7 @@ void setup() {
 
   Serial.begin(1000 * 1000);
   pinMode(LED_BUILTIN, OUTPUT);
-  
+
   //  Create timer 1
   timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
   timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
@@ -70,9 +70,9 @@ void setup() {
 
   setTimer(1000);
 
-  if (!dso32.begin_I2C(0x6B)) {
-    // if (!dso32.begin_SPI(LSM_CS)) {
-    //  if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
+  //  if (!dso32.begin_I2C(0x6B)) {
+  // if (!dso32.begin_SPI(LSM_CS)) {
+  if (!dso32.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
     Serial.println("Failed to find LSM6DSO32 chip");
     while (1) {
       delay(10);
@@ -94,9 +94,9 @@ void loop() {
   dso32.getEvent(&accel, &gyro, &temp);
 
   if (timer_flag == 1) {
-    setTimer(1000); // 1s
-    digitalWrite(LED_BUILTIN, led_state);
-    led_state = !led_state;
+    setTimer(2); // 500Hz
+//    digitalWrite(LED_BUILTIN, led_state);
+//    led_state = !led_state;
     Serial.print(accel.acceleration.x);
     Serial.print(","); Serial.print(accel.acceleration.y);
     Serial.print(","); Serial.print(accel.acceleration.z);
@@ -105,9 +105,8 @@ void loop() {
     Serial.print(","); Serial.print(gyro.gyro.y);
     Serial.print(","); Serial.print(gyro.gyro.z);
     Serial.println();
-  }
-
 #if BLUETOOTH_MODE
-  SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+    SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
 #endif
+  }
 }

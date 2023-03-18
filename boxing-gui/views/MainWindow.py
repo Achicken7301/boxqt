@@ -1,5 +1,4 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QThread
 import threading
 import datetime
 
@@ -23,11 +22,13 @@ from utils.sensor import (
     q_ay,
     q_az,
 )
-from utils.CNN import importCnnModel, process_raw_data, window_mask
+from utils.CNN import importCnnModel, process_raw_data
 import utils.CNN
 
 # database
 from database.PunchingBag import PunchingBag
+from models.SensorModel import Sensor
+from models.CnnModel  import CnnModel
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -63,11 +64,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.acceleration_chart.addLegend()
 
         self.update_punch_data_timer = QtCore.QTimer()
-        self.update_punch_data_timer.setInterval(1000)
+        self.update_punch_data_timer.setInterval(2000)
         self.update_punch_data_timer.timeout.connect(self.update_punches_view)
 
         # UI
         self.ui.save_folder_line.setText("boxing-gui/Profies/User/")
+
+        # Create model
+        self.sensor = Sensor()
 
     def start_button_pressed(self):
         # clear plot chart
@@ -79,7 +83,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.update_punch_data_timer.start()
 
         try:
-            getSensorData(utils.sensor.port, utils.sensor.baudrate)
+            getSensorData(self.sensor.port, self.sensor.baudrate)
+            # self.sensor.getData()
 
             # store sensor's data to queue
             self.get_data_thread = threading.Thread(target=importRawData)
@@ -164,9 +169,8 @@ class MainWindow(QtWidgets.QMainWindow):
     # LOAD MENU FILES
     def option_button_pressed(self, signal):
         # Load sensor option ui
-        dlg = SensorOptionsDialog(self)
-        if dlg.exec_():
-            pass
+        dlg = SensorOptionsDialog(self, self.sensor)
+        dlg.exec_()
 
     def profileOptionsTriggered(self, signal):
         dlg = ProfileOptionsDialog(self)

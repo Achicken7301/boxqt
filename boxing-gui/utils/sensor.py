@@ -2,12 +2,15 @@
 import utils.CNN
 import serial
 import queue as q
+from database.Database import Database
 
-queue_max_size = 1000
+queue_max_size = 2000
 
 q_ax = q.Queue(maxsize=queue_max_size)
 q_ay = q.Queue(maxsize=queue_max_size)
 q_az = q.Queue(maxsize=queue_max_size)
+
+queue_display = q.Queue(maxsize=queue_max_size)
 
 global acel_gyro_ser, get_data_flag, queue
 get_data_flag = False
@@ -81,10 +84,12 @@ def importRawData():
 
             # store to queue for display
             if not q_ax.full():
+                # queue_display.put(float(ax_ser), float(ay_ser), float(az_ser))
                 q_ax.put(float(ax_ser))
                 q_ay.put(float(ay_ser))
                 q_az.put(float(az_ser))
             else:
+                # queue_display.get()
                 q_ax.get()
                 q_ay.get()
                 q_az.get()

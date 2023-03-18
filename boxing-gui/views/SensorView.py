@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+
 # Load UI file
 from ui.Ui_sensor_option import Ui_SensorOptions
 
@@ -6,11 +7,15 @@ from ui.Ui_sensor_option import Ui_SensorOptions
 from utils.bluetooth import serial_ports
 import utils.sensor
 
-# Imports View
+# Imports Views
 from views.ErrorView import ErrorView
 
+# Import Models
+from models import SensorModel
+
+
 class SensorOptionsDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, sensor=SensorModel):
         super().__init__(parent)
         self.ui = Ui_SensorOptions()
         self.ui.setupUi(self)
@@ -29,11 +34,13 @@ class SensorOptionsDialog(QtWidgets.QDialog):
             self.itemDoubleClicked_event
         )
 
+        self.sensor = sensor
+
     def submitClose(self):
         # pass data to MainWindow
-        utils.sensor.baudrate = self.ui.baudrate.text()
-        print(f"{utils.sensor.port} is selected")
-        print(f"Baudrate {utils.sensor.baudrate} is selected")
+        self.sensor.baudrate = self.ui.baudrate.text()
+        print(f"{self.sensor.port} is selected")
+        print(f"Baudrate {self.sensor.baudrate} is selected")
         self.accept()
 
     def bluetoothScan(self):
@@ -41,17 +48,21 @@ class SensorOptionsDialog(QtWidgets.QDialog):
 
         list_ports = serial_ports()
         if len(list_ports) == 0:
-            ErrorView().dlg_deviceNotFound("Device NOT found!!!\nPlease connect to device via Bluetooth")
-            
+            ErrorView().dlg_deviceNotFound(
+                "Device NOT found!!!\nPlease connect to device via Bluetooth"
+            )
+
         self.ui.list_bluetooth_ports.addItems(list_ports)
         self.ui.list_bluetooth_ports.itemClicked.connect(self.itemClicked_event)
 
     def itemDoubleClicked_event(self, item):
-        utils.sensor.port = item.text()
+        # utils.sensor.port = item.text()
+        self.sensor.port = item.text()
         self.submitClose()
 
     def itemClicked_event(self, item):
-        utils.sensor.port = item.text()
+        # utils.sensor.port = item.text()
+        self.sensor.port = item.text()
 
     def clearListPorts(self):
         self.ui.list_bluetooth_ports.clear()

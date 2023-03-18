@@ -32,7 +32,7 @@ def importCnnModel():
         "D:\laragon\www/boxqt\CNN\classified_model"
     )
     regresstion_model = tf.keras.models.load_model(
-        "D:\laragon\www/boxqt\CNN/regression_model"
+        "D:/laragon/www/boxqt/CNN/regression_model"
     )
 
 
@@ -42,9 +42,9 @@ def process_raw_data(queue):
     df1 = pd.DataFrame()
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
-    # get 10 data 1st
+
     window_size = 5
-    # print("SLEEPT 500ms")
+
     while len(queue[0]) == 0:
         # print(queue[0])
         print("Wait for 1s")
@@ -107,11 +107,12 @@ def process_raw_data(queue):
                 np: no punch
                 p: punch
                 """
+                print("1st run model")
                 [[np, p]] = classified_model.predict(X_test)
 
-                print(classified_input)
-                if p > np:
-                    print("DECTECTED")
+                if p > 0.8:
+                    print(f"p > 0.8 run model\nnp: {np}, p: {p}")
+                    print(classified_input)
                     df1 = pd.concat([df1, classified_input], ignore_index=True)
                     count += 1
                     # print(f"count {count}: {acceleration_data_for_view}")
@@ -125,6 +126,12 @@ def process_raw_data(queue):
                     for window_index in range(6):
                         for _ in range(window_size):
                             window_mask[window_index].pop(0)
+
+                elif p > 0.5:
+                    print(f"p > 0.5 run model\nnp: {np}, p: {p}")
+                    print(classified_input)
+                    # input next 5 data from queue
+                    # run model through every data and output p and np AGAIN.
 
             # POP 10
             for window_index in range(6):
