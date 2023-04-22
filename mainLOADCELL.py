@@ -18,7 +18,7 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi("src/ui/DevMainWindow.ui", self)
 
         # self.port = "COM6"
-        self.baudrate = 115200
+        self.baudrate = 1000*1000 
         self.is_record = False
 
         self.portScan()
@@ -33,7 +33,7 @@ class MainWindow(QtWidgets.QMainWindow):
         os.remove(self.filePath)
 
     def moveFileBtn(self):
-        toDirectory = "D:\laragon\www\\boxqt\data\\08.01.22\\"
+        toDirectory = "D:\laragon\www\\boxqt\data\\"
         shutil.move(self.filePath, toDirectory)
 
     def clearList(self):

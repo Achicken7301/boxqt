@@ -1,70 +1,67 @@
-#include "BluetoothSerial.h"
+#include <Adafruit_ADS1X15.h>
 
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+Adafruit_ADS1115 ads;  /* Use this for the 16-bit version */
+//Adafruit_ADS1015 ads;     /* Use this for the 12-bit version */
+
+// Pin connected to the ALERT/RDY signal for new sample notification.
+constexpr int READY_PIN = 4;
+
+// This is required on ESP32 to put the ISR in IRAM. Define as
+// empty for other platforms. Be careful - other platforms may have
+// other requirements.
+#ifndef IRAM_ATTR
+#define IRAM_ATTR
 #endif
 
-#if !defined(CONFIG_BT_SPP_ENABLED)
-#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
-#endif
-
-BluetoothSerial SerialBT;
-
-
-int timer_counter = 0;
-int timer_flag = 0;
-
-int sampleRate = 1000; // 1000Hz
-
-#define CLOCK_TICK 1 //1ms
-
-hw_timer_t * timer = NULL;
-
-
-void setTimer(int duration) {
-  timer_counter = duration / CLOCK_TICK;
-  timer_flag = 0;
+volatile bool new_data = false;
+void IRAM_ATTR NewDataReadyISR() {
+  new_data = true;
 }
 
-void timerRun() {
-  if (timer_counter > 0) {
-    timer_counter--;
-    if (timer_counter <= 0) timer_flag = 1;
-  }
-}
-
-void IRAM_ATTR onTimer() {
-  timerRun();
-}
-
-#define FORCE_PIN   2
-
-void setup() {
+void setup(void)
+{
   Serial.begin(115200);
-  pinMode(FORCE_PIN, INPUT);
-  SerialBT.begin("ForceFSR"); //Bluetooth device name
+  Serial.println("Hello!");
 
-  //  Create timer 1
-  timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
-  timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
-  unsigned int timerFactor = 1000000 / sampleRate;    //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
-  timerAlarmWrite(timer, timerFactor, true);          //Initialize the timer
-  timerAlarmEnable(timer);
+  Serial.println("Getting differential reading from AIN0 (P) and AIN1 (N)");
+  Serial.println("ADC Range: +/- 6.144V (1 bit = 3mV/ADS1015, 0.1875mV/ADS1115)");
 
-  setTimer(1000);
+  // The ADC input range (or gain) can be changed via the following
+  // functions, but be careful never to exceed VDD +0.3V max, or to
+  // exceed the upper and lower limits if you adjust the input range!
+  // Setting these values incorrectly may destroy your ADC!
+  //                                                                ADS1015  ADS1115
+  //                                                                -------  -------
+  // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV      0.1875mV (default)
+  // ads.setGain(GAIN_ONE);        // 1x gain   +/- 4.096V  1 bit = 2mV      0.125mV
+  // ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
+  ads.setGain(GAIN_FOUR);       // 4x gain   +/- 1.024V  1 bit = 0.5mV    0.03125mV
+  //   ads.setGain(GAIN_EIGHT);      // 8x gain   +/- 0.512V  1 bit = 0.25mV   0.015625mV
+  // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
+
+  if (!ads.begin()) {
+    Serial.println("Failed to initialize ADS.");
+    while (1);
+  }
+
+  pinMode(READY_PIN, INPUT);
+  // We get a falling edge every time a new sample is ready.
+  attachInterrupt(digitalPinToInterrupt(READY_PIN), NewDataReadyISR, FALLING);
+
+  // Start continuous conversions.
+  ads.startADCReading(ADS1X15_REG_CONFIG_MUX_DIFF_0_1, /*continuous=*/true);
 }
-double Vmeas;
 
-double map_vmeas(double x, double in_min, double in_max, double out_min, double out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+void loop(void)
+{
+  // If we don't have new data, skip this iteration.
+  if (!new_data) {
+    return;
+  }
 
-void loop() {
-  Vmeas = map_vmeas(analogRead(FORCE_PIN), 0.0, 4095.0, 0.0, 3.3);
-//  if (timer_flag == 1) {
-//    setTimer(1000);
-//    Serial.printf("%d\n", analogRead(FORCE_PIN));
-//  }
-  SerialBT.printf("%0.4f\n", Vmeas);
+    int16_t results = ads.getLastConversionResults();
 
+    Serial.print("Differential: "); Serial.print(results); Serial.print("("); Serial.print(ads.computeVolts(results)); Serial.println("mV)");
+    Serial.printf("%.6f\n", ads.computeVolts(results));
+  new_data = false;
 }

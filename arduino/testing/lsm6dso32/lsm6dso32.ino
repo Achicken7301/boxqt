@@ -28,7 +28,6 @@ BluetoothSerial SerialBT;
 
 int timer_counter = 0;
 int timer_flag = 0;
-int led_state = 0;
 int sampleRate = 1000; // 1000Hz
 
 #define CLOCK_TICK 1 //1ms
@@ -58,13 +57,13 @@ void setup() {
   SerialBT.begin("AcelGryro"); //Bluetooth device name
 #endif
 
-  Serial.begin(1000 * 1000);
+  Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
 
   //  Create timer 1
   timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
   timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
-  unsigned int timerFactor = 1000000 / sampleRate;  //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
+  unsigned int timerFactor = 1000000 / sampleRate;    //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
   timerAlarmWrite(timer, timerFactor, true);          //Initialize the timer
   timerAlarmEnable(timer);
 
@@ -81,8 +80,12 @@ void setup() {
 
   dso32.setAccelRange(LSM6DSO32_ACCEL_RANGE_32_G);
   dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS );
+
   dso32.setGyroDataRate(LSM6DS_RATE_1_66K_HZ);
+  //  dso32.setGyroDataRate(LSM6DS_RATE_208_HZ);
+
   dso32.setAccelDataRate(LSM6DS_RATE_1_66K_HZ);
+  //  dso32.setAccelDataRate(LSM6DS_RATE_208_HZ);
 
 }
 
@@ -94,19 +97,17 @@ void loop() {
   dso32.getEvent(&accel, &gyro, &temp);
 
   if (timer_flag == 1) {
-    setTimer(2); // 500Hz
-//    digitalWrite(LED_BUILTIN, led_state);
-//    led_state = !led_state;
-    Serial.print(accel.acceleration.x);
-    Serial.print(","); Serial.print(accel.acceleration.y);
-    Serial.print(","); Serial.print(accel.acceleration.z);
-    Serial.print(",");
-    Serial.print(gyro.gyro.x);
-    Serial.print(","); Serial.print(gyro.gyro.y);
-    Serial.print(","); Serial.print(gyro.gyro.z);
-    Serial.println();
+    /*
+      Given: f = 150Hz
+      T = 1/f => 1/150 ~= 6
+    */
+    setTimer(6);
+    //    digitalWrite(LED_BUILTIN, led_state);
+    //    led_state = !led_state;
+    Serial.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
 #if BLUETOOTH_MODE
-    SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+    SerialBT.printf("%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
+    //    SerialBT.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
 #endif
   }
 }

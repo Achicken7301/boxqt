@@ -19,7 +19,7 @@ class Sensor(Database):
         self.axel_gyro_ser.close()
 
     def getData(self):
-        self.setup(port = self.port, baudrate = self.baudrate)
+        self.setup(port=self.port, baudrate=self.baudrate)
         self.axel_gyro_ser.readlines().decode("utf-8").splitlines()
 
     def stop_get_data(self):

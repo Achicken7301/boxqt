@@ -64,7 +64,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.acceleration_chart.addLegend()
 
         self.update_punch_data_timer = QtCore.QTimer()
-        self.update_punch_data_timer.setInterval(2000)
+        self.update_punch_data_timer.setInterval(1000)
         self.update_punch_data_timer.timeout.connect(self.update_punches_view)
 
         # UI
@@ -176,14 +176,14 @@ class MainWindow(QtWidgets.QMainWindow):
         dlg = ProfileOptionsDialog(self)
         # TODO: LOAD FROM DATABASE AUTH
         (
-            _,
+            # _,
             name,
             age,
             user_height,
             user_weight,
             user_metric,
-            _,
-            _,
+            # _,
+            # _,
             hanging_style,
             bag_weight,
             bag_lenght,

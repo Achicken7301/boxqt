@@ -43,7 +43,7 @@ def process_raw_data(queue):
     regresstion_input = pd.DataFrame()
     classified_input = pd.DataFrame()
 
-    window_size = 5
+    window_size = 10
 
     while len(queue[0]) == 0:
         # print(queue[0])
@@ -95,10 +95,16 @@ def process_raw_data(queue):
             !!! WARNING: increase memory when put data in the model. DONT KNOW HOW TO FIX
             """
             global punch
-            lowest_acel = 10
-            if regresstion_input["a_mean"][0] > lowest_acel:
+            lowest_acel_std = 10
+
+            print(regresstion_input["a_std"][0])
+
+            # if regresstion_input["a_mean"][0] > lowest_acel:
+            if regresstion_input["a_std"][0] > lowest_acel_std:
                 for i in range(len(window_mask)):
                     classified_input[i] = window_mask[i]
+
+                print(classified_input)
 
                 X_scaled = StandardScaler().fit_transform(classified_input)
                 X_test = X_scaled.reshape(1, 20, 6, 1)
@@ -112,7 +118,6 @@ def process_raw_data(queue):
 
                 if p > 0.8:
                     print(f"p > 0.8 run model\nnp: {np}, p: {p}")
-                    print(classified_input)
                     df1 = pd.concat([df1, classified_input], ignore_index=True)
                     count += 1
                     # print(f"count {count}: {acceleration_data_for_view}")

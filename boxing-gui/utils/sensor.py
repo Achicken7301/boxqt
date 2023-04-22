@@ -4,7 +4,7 @@ import serial
 import queue as q
 from database.Database import Database
 
-queue_max_size = 2000
+queue_max_size = 500
 
 q_ax = q.Queue(maxsize=queue_max_size)
 q_ay = q.Queue(maxsize=queue_max_size)

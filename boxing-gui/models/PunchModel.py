@@ -20,3 +20,4 @@ class Punch:
 
     def getPunch(self):
         return self.is_punched
+
