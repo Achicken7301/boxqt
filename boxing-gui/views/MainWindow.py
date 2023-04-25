@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 import threading
 import datetime
+import pandas as pd
 
 # Load UI
 from ui.Ui_main_window import Ui_MainWindow
@@ -28,7 +29,7 @@ import utils.CNN
 # database
 from database.PunchingBag import PunchingBag
 from models.SensorModel import Sensor
-from models.CnnModel  import CnnModel
+from models.CnnModel import CnnModel
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -106,9 +107,11 @@ class MainWindow(QtWidgets.QMainWindow):
             ErrorView().dlg_deviceNotFound("Device not Found!\nSetup device in Options")
 
     def update_punches_view(self):
+        global total_punches
+        total_punches = utils.CNN.total_p_value
         self.ui.number_of_punches.setText(str(utils.CNN.count))
         self.ui.current_force_line.setText(str(utils.CNN.p_value))
-        self.ui.peak_force_line.setText(str(max(utils.CNN.total_p_value)))
+        self.ui.peak_force_line.setText(str(max(total_punches)))
 
         # Plot Acel
         self.ui.acceleration_chart.clear()
@@ -136,6 +139,7 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
     def stop_button_pressed(self):
+        global total_punches
         # Cancel all threads
         stopGetData()
         # stop timer update main view
@@ -156,7 +160,11 @@ class MainWindow(QtWidgets.QMainWindow):
             filename = name_format + ".xlsx"
             filename = "yes_no_punches " + filename
             print(f"save file to {filename}")
+
+            total_punches = pd.DataFrame(total_punches)
+
             utils.CNN.df1.to_excel(path + filename, index=False)
+            total_punches.to_excel(path + "Force_model_" + name_format + ".xlsx", index=False)
 
     def zero_button_pressed(self):
         self.reset_plots()

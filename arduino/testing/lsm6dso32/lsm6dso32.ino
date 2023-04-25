@@ -4,11 +4,11 @@
 #define BLUETOOTH_MODE 1
 
 // For SPI mode, we need a CS pin
-#define LSM_CS    5
+#define LSM_CS 5
 // For software-SPI mode we need SCK/MOSI/MISO pins
-#define LSM_SCK   18
-#define LSM_MISO  19
-#define LSM_MOSI  23
+#define LSM_SCK 18
+#define LSM_MISO 19
+#define LSM_MOSI 23
 
 Adafruit_LSM6DSO32 dso32;
 
@@ -28,11 +28,11 @@ BluetoothSerial SerialBT;
 
 int timer_counter = 0;
 int timer_flag = 0;
-int sampleRate = 1000; // 1000Hz
+int sampleRate = 1000;  // 1000Hz
 
-#define CLOCK_TICK 1 //1ms
+#define CLOCK_TICK 1  //1ms
 
-hw_timer_t * timer = NULL;
+hw_timer_t* timer = NULL;
 
 
 void setTimer(int duration) {
@@ -54,17 +54,17 @@ void IRAM_ATTR onTimer() {
 
 void setup() {
 #if BLUETOOTH_MODE
-  SerialBT.begin("AcelGryro"); //Bluetooth device name
+  SerialBT.begin("AcelGryro");  //Bluetooth device name
 #endif
 
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
 
   //  Create timer 1
-  timer = timerBegin(1, 80, true);                    //Begin timer with 1 MHz frequency (80MHz/80)
-  timerAttachInterrupt(timer, &onTimer, true);        //Attach the interrupt to Timer1
-  unsigned int timerFactor = 1000000 / sampleRate;    //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
-  timerAlarmWrite(timer, timerFactor, true);          //Initialize the timer
+  timer = timerBegin(1, 80, true);                  //Begin timer with 1 MHz frequency (80MHz/80)
+  timerAttachInterrupt(timer, &onTimer, true);      //Attach the interrupt to Timer1
+  unsigned int timerFactor = 1000000 / sampleRate;  //Calculate the time interval between two readings, or more accurately, the number of cycles between two readings
+  timerAlarmWrite(timer, timerFactor, true);        //Initialize the timer
   timerAlarmEnable(timer);
 
   setTimer(1000);
@@ -79,14 +79,13 @@ void setup() {
   }
 
   dso32.setAccelRange(LSM6DSO32_ACCEL_RANGE_32_G);
-  dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS );
+  dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
 
   dso32.setGyroDataRate(LSM6DS_RATE_1_66K_HZ);
   //  dso32.setGyroDataRate(LSM6DS_RATE_208_HZ);
 
   dso32.setAccelDataRate(LSM6DS_RATE_1_66K_HZ);
   //  dso32.setAccelDataRate(LSM6DS_RATE_208_HZ);
-
 }
 
 

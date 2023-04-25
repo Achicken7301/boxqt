@@ -15,8 +15,8 @@ window_mask = [ax_window, ay_window, az_window, gx_window, gy_window, gz_window]
 
 count = 0
 p_value = 0
-total_p_value = []
-total_p_value.append(0)
+total_p_value = list()
+total_p_value.append(float(0))
 
 
 punch = Punch()
@@ -37,13 +37,16 @@ def importCnnModel():
 
 
 def process_raw_data(queue):
-    global count, p_value, acceleration_data_for_view, df1, regresstion_model, classified_model, process_raw_data_flag
+    global count, p_value, acceleration_data_for_view, df1, regresstion_model, classified_model, process_raw_data_flag, count, raw_data
     acceleration_data_for_view = pd.DataFrame()
     df1 = pd.DataFrame()
+    raw_data = pd.DataFrame()
     regresstion_input = pd.DataFrame()
-    classified_input = pd.DataFrame()
 
     window_size = 10
+
+    regg_flag = 0
+    pre_p = pd.DataFrame()
 
     while len(queue[0]) == 0:
         # print(queue[0])
@@ -73,8 +76,6 @@ def process_raw_data(queue):
 
                 break
         else:
-            # print(len(queue[0]))
-
             # Import data to window
             queue_push(queue, window_size)
 
@@ -88,60 +89,71 @@ def process_raw_data(queue):
                 window_mask[4],
                 window_mask[5],
             )
-            """
-            import data to window CNN and output force
-            with condition a_mean TODO may change the condition for better performance
-            lowest_acel is a aceleration value when no punch
-            !!! WARNING: increase memory when put data in the model. DONT KNOW HOW TO FIX
-            """
+
             global punch
-            lowest_acel_std = 10
+            lowest_acel_std = 2.5
 
             print(regresstion_input["a_std"][0])
 
-            # if regresstion_input["a_mean"][0] > lowest_acel:
-            if regresstion_input["a_std"][0] > lowest_acel_std:
-                for i in range(len(window_mask)):
-                    classified_input[i] = window_mask[i]
+            # Algorithm: more details in MY thesis
+            if regg_flag == 1:
+                if isOverThreshHold(regresstion_input, lowest_acel_std):
+                    if pre_p["a_std"][0] > regresstion_input["a_std"][0]:
+                        predict_window(pre_p)
+                    else:
+                        predict_window(regresstion_input)
+                else:
+                    predict_window(pre_p)
 
-                print(classified_input)
+                regg_flag = 0
+                queue_push(queue, window_size)
 
-                X_scaled = StandardScaler().fit_transform(classified_input)
-                X_test = X_scaled.reshape(1, 20, 6, 1)
+                # POP 10
+                for window_index in range(6):
+                    for _ in range(window_size):
+                        window_mask[window_index].pop(0)
 
-                """
-                np: no punch
-                p: punch
-                """
-                print("1st run model")
-                [[np, p]] = classified_model.predict(X_test)
+            else:
+                if isOverThreshHold(regresstion_input, lowest_acel_std):
+                    regg_flag = 1
+                    pre_p = regresstion_input.copy()
 
-                if p > 0.8:
-                    print(f"p > 0.8 run model\nnp: {np}, p: {p}")
-                    df1 = pd.concat([df1, classified_input], ignore_index=True)
-                    count += 1
-                    # print(f"count {count}: {acceleration_data_for_view}")
-                    [[p_value]] = regresstion_model.predict(regresstion_input)
-                    total_p_value.append(p_value)
+                queue_push(queue, window_size)
 
-                    # remove next data
-
-                    queue_push(queue, window_size)
-                    # POP 10
-                    for window_index in range(6):
-                        for _ in range(window_size):
-                            window_mask[window_index].pop(0)
-
-                elif p > 0.5:
-                    print(f"p > 0.5 run model\nnp: {np}, p: {p}")
-                    print(classified_input)
-                    # input next 5 data from queue
-                    # run model through every data and output p and np AGAIN.
+                # POP 10
+                for window_index in range(6):
+                    for _ in range(window_size):
+                        window_mask[window_index].pop(0)
 
             # POP 10
             for window_index in range(6):
                 for _ in range(window_size):
                     window_mask[window_index].pop(0)
+
+
+def predict_window(regresstion_input: pd.DataFrame):
+    global count, total_p_value, df1, p_value, raw_data
+
+    df1 = pd.concat(
+        [df1, regresstion_input],
+        axis=0,
+    )
+    count += 1
+
+    predict_data = regresstion_input[["g_std"]].copy()
+
+    # print(predict_data)
+
+    (cols, rows) = (1, 1)
+
+    predict_data = predict_data.values.reshape(1, cols, rows)
+
+    [[p_value]] = regresstion_model.predict(predict_data)
+    total_p_value.append(float(p_value))
+
+
+def isOverThreshHold(regresstion_input, threshold):
+    return regresstion_input["a_std"][0] > threshold
 
 
 def queue_push(queue, window_size):
@@ -159,31 +171,26 @@ def process_window_data(
     gy_popped: list,
     gz_popped: list,
 ):
-    ax_popped = pd.DataFrame(ax_popped)
-    ax_mean = ax_popped.abs().mean()
-    ax_std = ax_popped.std()
+    pd_ax_popped = pd.DataFrame(ax_popped)
+    pd_ay_popped = pd.DataFrame(ay_popped)
+    pd_az_popped = pd.DataFrame(az_popped)
+    pd_gx_popped = pd.DataFrame(gx_popped)
+    pd_gy_popped = pd.DataFrame(gy_popped)
+    pd_gz_popped = pd.DataFrame(gz_popped)
 
-    ay_popped = pd.DataFrame(ay_popped)
-    ay_mean = ay_popped.abs().mean()
-    ay_std = ay_popped.std()
+    ax_std = pd_ax_popped.std()
+    ay_std = pd_ay_popped.std()
+    az_std = pd_az_popped.std()
+    gx_std = pd_gx_popped.std()
+    gy_std = pd_gy_popped.std()
+    gz_std = pd_gz_popped.std()
 
-    az_popped = pd.DataFrame(az_popped)
-    az_mean = az_popped.abs().mean()
-    az_std = az_popped.std()
+    gx_max = pd_gx_popped.max()
+    gy_max = pd_gy_popped.max()
+    gz_max = pd_gz_popped.max()
 
-    gx_popped = pd.DataFrame(gx_popped)
-    gx_mean = gx_popped.abs().mean()
-    gx_std = gx_popped.std()
-
-    gy_popped = pd.DataFrame(gy_popped)
-    gy_mean = gy_popped.abs().mean()
-    gy_std = gy_popped.std()
-
-    gz_popped = pd.DataFrame(gz_popped)
-    gz_mean = gz_popped.abs().mean()
-    gz_std = gz_popped.std()
-
-    input["a_mean"] = pow(pow(ax_mean, 2) + pow(ay_mean, 2) + pow(az_mean, 2), 1 / 2)
-    input["g_mean"] = pow(pow(gx_mean, 2) + pow(gy_mean, 2) + pow(gz_mean, 2), 1 / 2)
+    # input["a_mean"] = pow(pow(ax_mean, 2) + pow(ay_mean, 2) + pow(az_mean, 2), 1 / 2)
+    # input["g_mean"] = pow(pow(gx_mean, 2) + pow(gy_mean, 2) + pow(gz_mean, 2), 1 / 2)
     input["a_std"] = pow(pow(ax_std, 2) + pow(ay_std, 2) + pow(az_std, 2), 1 / 2)
     input["g_std"] = pow(pow(gx_std, 2) + pow(gy_std, 2) + pow(gz_std, 2), 1 / 2)
+    input["g_max"] = pow(pow(gx_max, 2) + pow(gy_max, 2) + pow(gz_max, 2), 1 / 2)

@@ -10,3 +10,5 @@
 /CNN
 /boxing-gui/database
 /boxing-gui/database
+*.xlsx
+*.csv

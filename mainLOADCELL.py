@@ -87,7 +87,7 @@ class MainWindow(QtWidgets.QMainWindow):
         name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
         name_format = name_format.replace(":", "-")
         self.filename = name_format + ".csv"
-        self.filename = "Force " + self.filename
+        self.filename = "Force_loadcell" + self.filename
         self.filePath = "D:\laragon\www\\boxqt\\" + self.filename
 
         f_buffer = []
