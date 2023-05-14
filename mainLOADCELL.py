@@ -1,13 +1,13 @@
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
 import sys
 import serial
 import datetime
-import csv
 import serial.tools.list_ports
 import pandas as pd
-import pyqtgraph as pg
 import os
 import shutil
+
+from src.ui.DevMainWindow_ui import Ui_MainWindow
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -16,10 +16,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Load the UI Page
         uic.loadUi("src/ui/DevMainWindow.ui", self)
+        # self = Ui_MainWindow()
+        # self.setupUi(self)
 
         # self.port = "COM6"
-        self.baudrate = 1000*1000 
+        self.baudrate = 1000 * 1000
         self.is_record = False
+
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.NoBrush)
+        self.my_widget.setProperty("backgroundBrush", brush)
+
+        # init btn
+        self.startRecordBtn.setEnabled(True)
+        self.stopRecordBtn.setEnabled(False)
 
         self.portScan()
         self.startRecordBtn.clicked.connect(self.startRecord)
@@ -41,6 +51,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.portOnHand.clear()
 
     def startRecord(self):
+        self.startRecordBtn.setEnabled(False)
+        self.stopRecordBtn.setEnabled(True)
+
         if self.is_record == True:
             print("Already Recording")
         else:
@@ -60,6 +73,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.timer.start()
 
     def stopRecord(self):
+        self.startRecordBtn.setEnabled(True)
+        self.stopRecordBtn.setEnabled(False)
         if self.is_record == True:
             self.is_record = False
             self.ser.close()
@@ -86,7 +101,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # filename: dd-mm-YYYY hh:mm:ss
         name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
         name_format = name_format.replace(":", "-")
-        self.filename = name_format + ".csv"
+        self.filename = name_format + ".xlsx"
+        # self.filename = name_format + ".csv"
         self.filename = "Force_loadcell" + self.filename
         self.filePath = "D:\laragon\www\\boxqt\\" + self.filename
 
@@ -99,12 +115,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # plot data: x, y values
         self.my_widget.clear()
-        self.my_widget.plot(f_buffer)
+        # self.my_widget.plot(f_buffer)
+
+        self.my_widget.plot(
+            range(0, len(list(f_buffer))),
+            list(f_buffer),
+            pen={"color": "b", "width": 1},
+        )
 
         # Save data to csv
-        df = pd.DataFrame(list(zip(f_buffer)), columns=["f"])
+        # df = pd.DataFrame(list(zip(f_buffer)), columns=["f"])
+        # df.to_csv(self.filename)
 
-        df.to_csv(self.filename)
+        # Save data to xlsx
+        df = pd.DataFrame(f_buffer)
+        df.to_excel(self.filename, index=False)
 
     def portScan(self):
         print("Start scaning")
@@ -144,6 +169,7 @@ class MainWindow(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
+    main.setWindowTitle("Loadcell Device")
     main.show()
     sys.exit(app.exec_())
 

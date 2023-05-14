@@ -1,11 +1,9 @@
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
 import sys
 import serial
 import datetime
-import csv
 import serial.tools.list_ports
 import pandas as pd
-import pyqtgraph as pg
 import os
 import shutil
 
@@ -15,11 +13,15 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.port = "COM3"
-        self.baudrate = 115200 
+        self.baudrate = 115200
         self.is_record = False
         uic.loadUi("src/ui/DevMainWindow.ui", self)
 
         self.my_widget.addLegend()
+        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.NoBrush)
+        self.my_widget.setProperty("backgroundBrush", brush)
+
         # Load the UI Page
         self.portScan()
         self.startRecordBtn.clicked.connect(self.startRecord)
@@ -40,7 +42,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toDirectory = self.dir.text()
         self.dir.setText(self.toDirectory)
         shutil.move(self.filename, self.toDirectory)
-        self.status.setText(f"Moved file {self.filename} to {self.toDirectory} successfully")
+        self.status.setText(
+            f"Moved file {self.filename} to {self.toDirectory} successfully"
+        )
         print(f"Moved file {self.filename} to {self.toDirectory} successfully")
 
     def deleteBtn(self):
@@ -105,7 +109,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # filename: dd-mm-YYYY hh:mm:ss
         name_format = datetime.datetime.now().strftime("%x %X").replace("/", "-")
         name_format = name_format.replace(":", "-")
-        self.filename = name_format + ".csv"
+        self.filename = name_format + ".xlsx"
         self.filename = "AcelGyro " + self.filename
         # clean data
         ax_buffer = []
@@ -128,16 +132,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # plot data: x, y values
         self.my_widget.clear()
-        self.my_widget.plot(range(0, len(ax_buffer)), ax_buffer)
-        self.my_widget.plot(range(0, len(ax_buffer)), ay_buffer)
-        self.my_widget.plot(range(0, len(ax_buffer)), az_buffer)
 
-        df = pd.DataFrame(
-            list(zip(ax_buffer, ay_buffer, az_buffer, gx_buffer, gy_buffer, gz_buffer)),
-            columns=["ax", "ay", "az", "gx", "gy", "gz"],
+        self.my_widget.plot(
+            range(0, len(list(ax_buffer))),
+            list(ax_buffer),
+            pen={"color": "r", "width": 1},
         )
-        # print(self.filePath + self.filename)
-        df.to_csv(self.filename)
+
+        self.my_widget.plot(
+            range(0, len(list(ay_buffer))),
+            list(ay_buffer),
+            pen={"color": "b", "width": 1},
+        )
+
+        self.my_widget.plot(
+            range(0, len(list(ax_buffer))),
+            list(az_buffer),
+            pen={"color": "b", "width": 1},
+        )
+
+        df = pd.DataFrame()
+
+        df["ax"] = pd.DataFrame(ax_buffer)
+        df["ay"] = pd.DataFrame(ay_buffer)
+        df["az"] = pd.DataFrame(az_buffer)
+        df["gx"] = pd.DataFrame(gx_buffer)
+        df["gy"] = pd.DataFrame(gy_buffer)
+        df["gz"] = pd.DataFrame(gz_buffer)
+
+        df.to_excel(self.filename, index=False)
 
     def portScan(self):
         print("Start scaning")
@@ -156,7 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port = self.portOnHand.currentText()
 
     # https://stackoverflow.com/questions/55816358/how-to-obtain-bluetooth-port-direction-with-pyserial
-    def serial_ports(self):
+    def serial_ports(self) -> list:
         port = []
         cp = serial.tools.list_ports.comports()
         for p in cp:
@@ -174,10 +197,12 @@ class MainWindow(QtWidgets.QMainWindow):
         return port
 
 
-def main():
+def main() -> None:
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
+    main.setWindowTitle("Aceleration & Gyroscope Device")
     main.show()
+
     sys.exit(app.exec_())
 
 
