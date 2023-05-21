@@ -6,104 +6,111 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>741</width>
-    <height>586</height>
+    <width>758</width>
+    <height>412</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Boxqt for Developers</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Select port:</string>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <property name="leftMargin">
+         <number>10</number>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="portOnHand"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="startRecordBtn">
-        <property name="text">
-         <string>Start Recording</string>
+        <property name="topMargin">
+         <number>10</number>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="stopRecordBtn">
-        <property name="text">
-         <string>Stop Recording</string>
+        <property name="rightMargin">
+         <number>10</number>
         </property>
-       </widget>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Select port:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="dir">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="uiPortScan">
+          <property name="text">
+           <string>Scan ports</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Recording Status:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Directory:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="sample_rate">
+          <property name="text">
+           <string>Suspending</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="portOnHand"/>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="startRecordBtn">
+          <property name="text">
+           <string>Start Recording</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QPushButton" name="stopRecordBtn">
+          <property name="text">
+           <string>Stop Recording</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="moveFile">
+          <property name="text">
+           <string>Move File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QPushButton" name="deleteFile">
+          <property name="text">
+           <string>Delete File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <widget class="QLabel" name="status">
+          <property name="text">
+           <string>Status</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="uiPortScan">
-        <property name="text">
-         <string>Scan ports</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Recording Status:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="sample_rate">
-        <property name="text">
-         <string>Suspending</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1">
-       <widget class="QPushButton" name="moveFile">
-        <property name="text">
-         <string>Move File</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Directory:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QLineEdit" name="dir"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="deleteFile">
-        <property name="text">
-         <string>Delete File</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
+      <item>
        <widget class="PlotWidget" name="my_widget" native="true">
         <property name="enabled">
          <bool>false</bool>
@@ -113,55 +120,9 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="QLabel" name="status">
-        <property name="text">
-         <string>Status</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>741</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu_Profile">
-    <property name="title">
-     <string>&amp;Profile</string>
-    </property>
-    <addaction name="action_info"/>
-    <addaction name="actionDuplicate"/>
-    <addaction name="actionRename"/>
-    <addaction name="actionRemove"/>
-    <addaction name="actionImport"/>
-    <addaction name="actionExport"/>
-    <addaction name="separator"/>
-    <addaction name="actionProfile1"/>
-   </widget>
-   <widget class="QMenu" name="menu_About">
-    <property name="title">
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="action_About_us"/>
-   </widget>
-   <widget class="QMenu" name="menuTools">
-    <property name="title">
-     <string>&amp;Tools</string>
-    </property>
-    <addaction name="actionAuto_Congifuration_Wizard"/>
-    <addaction name="actionSetting"/>
-   </widget>
-   <addaction name="menu_Profile"/>
-   <addaction name="menuTools"/>
-   <addaction name="menu_About"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionBoard_Setting">

@@ -18,7 +18,6 @@ p_value = 0
 total_p_value = list()
 total_p_value.append(float(0))
 
-
 punch = Punch()
 
 
@@ -29,10 +28,10 @@ def importCnnModel():
     #  TODO SPEED THINGS UP
     # https://stackoverflow.com/questions/65298241/what-does-this-tensorflow-message-mean-any-side-effect-was-the-installation-su#:~:text=which%20can%20speed%20things%20up
     classified_model = tf.keras.models.load_model(
-        "D:\laragon\www/boxqt\CNN\classified_model"
+        r"D:\laragon\www/boxqt\CNN\classified_model"
     )
     regresstion_model = tf.keras.models.load_model(
-        "D:/laragon/www/boxqt/CNN/regression_model"
+        r"D:/laragon/www/boxqt/CNN/regression_model"
     )
 
 
@@ -91,7 +90,7 @@ def process_raw_data(queue):
             )
 
             global punch
-            lowest_acel_std = 2.5
+            lowest_acel_std = 3
 
             print(regresstion_input["a_std"][0])
 
@@ -132,19 +131,18 @@ def process_raw_data(queue):
 
 
 def predict_window(regresstion_input: pd.DataFrame):
-    global count, total_p_value, df1, p_value, raw_data
+    global count, total_p_value, df1, p_value, raw_data, input_features
+
+    # print(regresstion_input)
 
     df1 = pd.concat(
         [df1, regresstion_input],
         axis=0,
     )
     count += 1
+    predict_data = regresstion_input[input_features].copy()
 
-    predict_data = regresstion_input[["g_std"]].copy()
-
-    # print(predict_data)
-
-    (cols, rows) = (1, 1)
+    (cols, rows) = (len(input_features), 1)
 
     predict_data = predict_data.values.reshape(1, cols, rows)
 
@@ -171,12 +169,26 @@ def process_window_data(
     gy_popped: list,
     gz_popped: list,
 ):
+    global input_features
     pd_ax_popped = pd.DataFrame(ax_popped)
     pd_ay_popped = pd.DataFrame(ay_popped)
     pd_az_popped = pd.DataFrame(az_popped)
     pd_gx_popped = pd.DataFrame(gx_popped)
     pd_gy_popped = pd.DataFrame(gy_popped)
     pd_gz_popped = pd.DataFrame(gz_popped)
+
+    input_features = [
+        # "a_std",
+        # "g_std",
+        "ax_std",
+        "ay_std",
+        "az_std",
+        "gx_std",
+        "gy_std",
+        "gz_std",
+        # "ax_mean",
+        # "ay_mean",
+    ]
 
     ax_std = pd_ax_popped.std()
     ay_std = pd_ay_popped.std()
@@ -185,12 +197,24 @@ def process_window_data(
     gy_std = pd_gy_popped.std()
     gz_std = pd_gz_popped.std()
 
-    gx_max = pd_gx_popped.max()
-    gy_max = pd_gy_popped.max()
-    gz_max = pd_gz_popped.max()
+    # ax_mean = pd_ax_popped.mean()
+    # ay_mean = pd_ay_popped.mean()
+    # az_mean = pd_az_popped.mean()
+    # gx_mean = pd_gx_popped.mean()
+    # gy_mean = pd_gy_popped.mean()
+    # gz_mean = pd_gz_popped.mean()
+
+    input["ax_std"] = ax_std
+    input["ay_std"] = ay_std
+    input["az_std"] = az_std
+    input["gx_std"] = gx_std
+    input["gy_std"] = gy_std
+    input["gz_std"] = gz_std
+    # input["ax_mean"] = ax_mean
+    # input["ay_mean"] = ay_mean
 
     # input["a_mean"] = pow(pow(ax_mean, 2) + pow(ay_mean, 2) + pow(az_mean, 2), 1 / 2)
     # input["g_mean"] = pow(pow(gx_mean, 2) + pow(gy_mean, 2) + pow(gz_mean, 2), 1 / 2)
     input["a_std"] = pow(pow(ax_std, 2) + pow(ay_std, 2) + pow(az_std, 2), 1 / 2)
     input["g_std"] = pow(pow(gx_std, 2) + pow(gy_std, 2) + pow(gz_std, 2), 1 / 2)
-    input["g_max"] = pow(pow(gx_max, 2) + pow(gy_max, 2) + pow(gz_max, 2), 1 / 2)
+    input["g_theory"] = pow(pow(pd_gx_popped, 2) + pow(pd_gy_popped, 2) + pow(pd_gz_popped, 2), 1 / 2).max()

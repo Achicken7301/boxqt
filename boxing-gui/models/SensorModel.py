@@ -8,10 +8,10 @@ class Sensor(Database):
         self.get_data_flag = True
 
         # Load port and baudrate from database
-        self.port = "COM3"
-        self.baudrate = 115200
+        self.port = "COM4"
+        self.baudrate = 1000 * 1000
 
-    def setup(self, port: str = "COM3", baudrate: int = 115200) -> None:
+    def setup(self, port: str = "COM4", baudrate: int = 115200) -> None:
         self.axel_gyro_ser = serial.Serial(port, baudrate)
         # save port and baudrate to database
 

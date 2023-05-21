@@ -11,6 +11,7 @@ from views.SensorView import SensorOptionsDialog
 from views.ProfileView import ProfileOptionsDialog
 from views.ErrorView import ErrorView
 from views.About import AboutThisAppDialog
+from views.HistoryView import HistoryViewDialog
 
 # import modules
 import utils.sensor
@@ -23,6 +24,7 @@ from utils.sensor import (
     q_ay,
     q_az,
 )
+
 from utils.CNN import importCnnModel, process_raw_data
 import utils.CNN
 
@@ -30,7 +32,6 @@ import utils.CNN
 from database.PunchingBag import PunchingBag
 from models.SensorModel import Sensor
 from models.CnnModel import CnnModel
-
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -45,7 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.stop_button.clicked.connect(self.stop_button_pressed)
         self.ui.zero_button.clicked.connect(self.zero_button_pressed)
         self.ui.option_button.clicked.connect(self.option_button_pressed)
-        self.ui.zoom_button.clicked.connect(self.zoom_button_pressed)
+        self.ui.history_button.clicked.connect(self.history_button_pressed)
 
         # *
         # * Menu callback
@@ -106,12 +107,22 @@ class MainWindow(QtWidgets.QMainWindow):
             print(e)
             ErrorView().dlg_deviceNotFound("Device not Found!\nSetup device in Options")
 
+    def average(self, list) -> str:
+        # return str(sum(list) / len(list))
+        return str("{:.0f}".format(sum(list) / len(list)))
+
     def update_punches_view(self):
         global total_punches
         total_punches = utils.CNN.total_p_value
         self.ui.number_of_punches.setText(str(utils.CNN.count))
-        self.ui.current_force_line.setText(str(utils.CNN.p_value))
-        self.ui.peak_force_line.setText(str(max(total_punches)))
+        self.ui.current_force_line.setText(str("{:.0f}".format(utils.CNN.p_value)))
+        self.ui.peak_force_line.setText(str("{:.0f}".format(max(total_punches))))
+        self.ui.average_force_line.setText(self.average(total_punches))
+
+        # self.ui.history_table
+        self.ui.history_table.clear()
+        for value in total_punches:
+            self.ui.history_table.insertItem(0, str("{:.0f} N".format(value)))
 
         # Plot Acel
         self.ui.acceleration_chart.clear()
@@ -140,10 +151,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def stop_button_pressed(self):
         global total_punches
+
         # Cancel all threads
         stopGetData()
         # stop timer update main view
         self.update_punch_data_timer.stop()
+        
 
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
@@ -151,7 +164,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Wait for using all data in queue
         self.get_data_thread.join()
-
+        # self.process_raw_data_thread.join()
+        
+        # Save history data
         if self.ui.log_check.isChecked():
             path = self.ui.save_folder_line.text()
             # filename: dd-mm-YYYY hh:mm:ss
@@ -159,21 +174,26 @@ class MainWindow(QtWidgets.QMainWindow):
             name_format = name_format.replace(":", "-")
             filename = name_format + ".xlsx"
             filename = "yes_no_punches " + filename
-            print(f"save file to {filename}")
-
+            # print(f"save file to {filename}")
+            total_punches.pop(0)
             total_punches = pd.DataFrame(total_punches)
 
             utils.CNN.df1.to_excel(path + filename, index=False)
-            total_punches.to_excel(path + "Force_model_" + name_format + ".xlsx", index=False)
+            total_punches.to_excel(
+                path + "Force_model_" + name_format + ".xlsx",
+                index=False,
+                header=["f(model)"],
+            )
 
     def zero_button_pressed(self):
         self.reset_plots()
 
         self.ui.zero_button.setEnabled(False)
 
-    def zoom_button_pressed(self):
-        self.setWindowTitle("Zoom")
-
+    def history_button_pressed(self):
+        historyView = HistoryViewDialog(self)
+        historyView.exec_()
+        
     # LOAD MENU FILES
     def option_button_pressed(self, signal):
         # Load sensor option ui

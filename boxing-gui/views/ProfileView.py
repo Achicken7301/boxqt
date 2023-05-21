@@ -1,5 +1,4 @@
 from PyQt5 import QtWidgets, QtGui
-import csv
 
 # Load UI files
 from ui.Ui_profile_options import Ui_ProfileSettings

@@ -57,7 +57,7 @@ void setup() {
   SerialBT.begin("AcelGryro");  //Bluetooth device name
 #endif
 
-  Serial.begin(115200);
+  Serial.begin(1000 * 1000);
   pinMode(LED_BUILTIN, OUTPUT);
 
   //  Create timer 1
@@ -79,7 +79,7 @@ void setup() {
   }
 
   dso32.setAccelRange(LSM6DSO32_ACCEL_RANGE_32_G);
-  dso32.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
+  dso32.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS);
 
   dso32.setGyroDataRate(LSM6DS_RATE_1_66K_HZ);
   //  dso32.setGyroDataRate(LSM6DS_RATE_208_HZ);
@@ -87,7 +87,6 @@ void setup() {
   dso32.setAccelDataRate(LSM6DS_RATE_1_66K_HZ);
   //  dso32.setAccelDataRate(LSM6DS_RATE_208_HZ);
 }
-
 
 void loop() {
   sensors_event_t accel;
@@ -97,12 +96,10 @@ void loop() {
 
   if (timer_flag == 1) {
     /*
-      Given: f = 150Hz
-      T = 1/f => 1/150 ~= 6
+    f = 150
+    T = 1/f = 0.005
     */
-    setTimer(6);
-    //    digitalWrite(LED_BUILTIN, led_state);
-    //    led_state = !led_state;
+    setTimer(5);
     Serial.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);
 #if BLUETOOTH_MODE
     SerialBT.printf("%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n", accel.acceleration.x, accel.acceleration.y, accel.acceleration.z, gyro.gyro.x, gyro.gyro.y, gyro.gyro.z);

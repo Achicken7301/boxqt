@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # set app icon
     app_icon = QtGui.QIcon()
-    app_icon.addFile("boxing-gui/icons/logo.png", QtCore.QSize(64, 64))
+    app_icon.addFile("boxing-gui/ui/icons/logo.png", QtCore.QSize(64, 64))
     app.setWindowIcon(app_icon)
 
     return_value = app.exec_()
