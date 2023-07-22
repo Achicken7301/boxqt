@@ -432,7 +432,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "../Assembly/Device on bag.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""

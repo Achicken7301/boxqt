@@ -33,6 +33,7 @@ from database.PunchingBag import PunchingBag
 from models.SensorModel import Sensor
 from models.CnnModel import CnnModel
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -149,6 +150,18 @@ class MainWindow(QtWidgets.QMainWindow):
             name="az",
         )
 
+        #
+        self.ui.force_chart.clear()
+
+        self.ui.force_chart.plot(
+            range(0, len(list(total_punches))),
+            list(total_punches),
+            pen={"color": "b", "width": 1},
+            name="force",
+            symbol="x",
+            symbolSize=14,
+        )
+
     def stop_button_pressed(self):
         global total_punches
 
@@ -156,7 +169,6 @@ class MainWindow(QtWidgets.QMainWindow):
         stopGetData()
         # stop timer update main view
         self.update_punch_data_timer.stop()
-        
 
         self.ui.start_button.setEnabled(True)
         self.ui.stop_button.setEnabled(False)
@@ -165,7 +177,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Wait for using all data in queue
         self.get_data_thread.join()
         # self.process_raw_data_thread.join()
-        
+
         # Save history data
         if self.ui.log_check.isChecked():
             path = self.ui.save_folder_line.text()
@@ -191,9 +203,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.zero_button.setEnabled(False)
 
     def history_button_pressed(self):
-        historyView = HistoryViewDialog(self)
-        historyView.exec_()
-        
+        dir_path = r"D:\laragon\www\boxqt\boxing-gui\Profies\User"
+        historyView = HistoryViewDialog(self, dir_path)
+        if historyView.exec_():
+            self.buff_acel = historyView.ondoubleClicked()
+            print(self.buff_acel)
+
+            # Plot Acel
+            self.ui.acceleration_chart.clear()
+
+            # update 3 valie ax, ay, az
+            self.ui.acceleration_chart.plot(
+                range(0, len(self.buff_acel)),
+                self.buff_acel["ax"],
+                pen={"color": "r", "width": 1},
+                name="ax",
+            )
+
+            self.ui.acceleration_chart.plot(
+                range(0, len(self.buff_acel)),
+                self.buff_acel["ay"],
+                pen={"color": "g", "width": 1},
+                name="ay",
+            )
+
+            self.ui.acceleration_chart.plot(
+                range(0, len(self.buff_acel)),
+                self.buff_acel["az"],
+                pen={"color": "b", "width": 1},
+                name="az",
+            )
+
     # LOAD MENU FILES
     def option_button_pressed(self, signal):
         # Load sensor option ui
